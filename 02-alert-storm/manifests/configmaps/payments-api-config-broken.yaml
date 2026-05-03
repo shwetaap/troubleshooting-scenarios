@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-api-config
+  namespace: payments
+  labels:
+    app: payments-api
+    app.kubernetes.io/part-of: payment-processor
+data:
+  settings.json: |
+    {
+      "enable_transaction_cache": true,
+      "cache_max_entries": 100000,
+      "cache_ttl_seconds": 3600,
+      "log_level": "INFO",
+      "payment_timeout_ms": 5000
+    }
