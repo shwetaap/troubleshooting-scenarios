@@ -1,0 +1,143 @@
+# TLS server with self-signed cert; client performs HTTPS handshakes (TLS/connection errors on mismatch).
+# tls-server-cert Secret is created by setup.sh (openssl) — not stored in git.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: netobserv-eval-tls
+  labels:
+    purpose: netobserv-eval
+    netobserv.openshift.io/eval-scenario: tls
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tls-nginx-config
+  namespace: netobserv-eval-tls
+data:
+  nginx.conf: |
+    # Required for nginx-unprivileged on OpenShift (non-root cannot write /run/nginx.pid).
+    pid /tmp/nginx.pid;
+    worker_processes 1;
+    error_log /dev/stderr warn;
+    events { worker_connections 1024; }
+    http {
+      access_log /dev/stdout;
+      server {
+        listen 8443 ssl;
+        ssl_certificate     /etc/tls/tls.crt;
+        ssl_certificate_key /etc/tls/tls.key;
+        location / { return 200 "ok\n"; }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-server
+  namespace: netobserv-eval-tls
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tls-server
+  template:
+    metadata:
+      labels:
+        app: tls-server
+        netobserv.openshift.io/eval-scenario: tls
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          # Image USER 101 — do not set runAsUser (OpenShift SCC rejects UID 101 outside project range).
+          image: nginxinc/nginx-unprivileged:1.27-alpine@sha256:65e3e85dbaed8ba248841d9d58a899b6197106c23cb0ff1a132b7bfe0547e4c0
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: tls
+              mountPath: /etc/tls
+              readOnly: true
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: tls
+          secret:
+            secretName: tls-server-cert
+        - name: config
+          configMap:
+            name: tls-nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tls-server
+  namespace: netobserv-eval-tls
+spec:
+  selector:
+    app: tls-server
+  ports:
+    - name: https
+      port: 8443
+      targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-client
+  namespace: netobserv-eval-tls
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tls-client
+  template:
+    metadata:
+      labels:
+        app: tls-client
+        netobserv.openshift.io/eval-scenario: tls
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: client
+          image: busybox:1.36.1@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+            capabilities:
+              drop: ["ALL"]
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              while true; do
+                echo "Probing HTTPS (expect TLS/certificate errors)…"
+                if wget -q -O- -T 5 "https://tls-server:8443/" 2>&1; then
+                  echo "unexpected HTTPS success"
+                else
+                  echo "ERROR: TLS/certificate verification failed (expected — self-signed cert)"
+                fi
+                echo "Probing plain HTTP on TLS port (expect protocol mismatch)…"
+                if wget -q -O- -T 5 "http://tls-server:8443/" 2>&1; then
+                  echo "unexpected HTTP success"
+                else
+                  echo "ERROR: protocol mismatch on TLS port (expected)"
+                fi
+                sleep 8
+              done
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              memory: 128Mi

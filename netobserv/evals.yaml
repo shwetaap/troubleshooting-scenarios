@@ -1,0 +1,133 @@
+# NetObserv evaluation scenarios — requires live cluster + NetObserv + kubernetes-mcp-server (netobserv toolset)
+
+# --- DNS latency (DNSTracking) ---
+- conversation_group_id: dns_latency
+  tag: dns_latency
+  description: "NetObserv DNS latency — investigate slow DNS using flow metrics or flow logs"
+
+  turns:
+    - turn_id: dns_latency
+      query: >
+        Applications in namespace netobserv-eval-dns-latency report slow DNS lookups over
+        the last hour. Use NetObserv network observability data to investigate DNS latency
+        and identify which workloads or queries are affected.
+      expected_response: >
+        Evidence-based investigation using NetObserv tools (netobserv_get_flow_metrics,
+        netobserv_list_flows): DNS-related flow metrics or flow fields (DnsLatencyMs, DnsName).
+        Identifies namespaces or workloads with elevated latency, cites concrete values from
+        tool output, and mentions DNSTracking or missing data if flows/metrics are unavailable.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./dns_latency/setup.sh
+  cleanup_script: ./dns_latency/cleanup.sh
+
+# --- DNS NXDOMAIN / DNS errors ---
+- conversation_group_id: dns_nxdomain
+  tag: dns_nxdomain
+  description: "NetObserv DNS errors — NXDOMAIN and DNS failure investigation"
+
+  turns:
+    - turn_id: dns_nxdomain
+      query: >
+        Namespace netobserv-eval-dns-nxdomain has DNS resolution failures. Use NetObserv
+        flow metrics and flow logs for the last hour to find NXDOMAIN responses or failing
+        query names. Report what is failing with evidence from tool output.
+      expected_response: >
+        Uses NetObserv flow metrics and/or netobserv_list_flows showing NXDOMAIN responses
+        (DnsFlagsResponseCode, failing DnsName such as does-not-exist-*.netobserv-eval.invalid).
+        Names the target namespace netobserv-eval-dns-nxdomain, cites sample failing query names
+        or counts from tool output, and explains the DNS resolution failure pattern.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./dns_nxdomain/setup.sh
+  cleanup_script: ./dns_nxdomain/cleanup.sh
+
+# --- Kernel packet drops ---
+- conversation_group_id: packet_drops_kernel
+  tag: packet_drops_kernel
+  description: "NetObserv packet drops — kernel-level drops (PacketDropsByKernel)"
+
+  turns:
+    - turn_id: packet_drops_kernel
+      query: >
+        Network traffic in namespace netobserv-eval-drops-kernel shows packet loss. Investigate
+        kernel-level packet drops using NetObserv flow metrics and flow logs. Which nodes or
+        workloads are affected and what drop causes appear?
+      expected_response: >
+        Investigates kernel packet drops with NetObserv tools: flow metrics or netobserv_list_flows
+        with drop fields (PktDrop*, packetLoss=dropped). Identifies nodes, namespaces, or workloads
+        with drops, cites drop causes from flow data when available, and distinguishes kernel drops
+        from policy drops.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./packet_drops_kernel/setup.sh
+  cleanup_script: ./packet_drops_kernel/cleanup.sh
+
+# --- Network policy packet drops ---
+- conversation_group_id: packet_drops_policy
+  tag: packet_drops_policy
+  description: "NetObserv packet drops — network policy denials (NetpolDenied)"
+
+  turns:
+    - turn_id: packet_drops_policy
+      query: >
+        In namespace netobserv-eval-drops-policy, pods cannot reach each other and we suspect
+        NetworkPolicy is blocking traffic. Use NetObserv to find network policy related drops
+        or denials in the last hour.
+      expected_response: >
+        Identifies NetworkPolicy-related denials in netobserv-eval-drops-policy using flow metrics
+        and/or flows with OVS_DROP_EXPLICIT and packetLoss=dropped between policy-frontend and
+        policy-backend. Names the restrictive policy (deny-frontend-to-backend) or src/dst workloads,
+        cites evidence from tool output, and recommends NetworkPolicy review.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./packet_drops_policy/setup.sh
+  cleanup_script: ./packet_drops_policy/cleanup.sh
+
+# --- TLS / HTTPS / ingress connectivity ---
+- conversation_group_id: tls_issues
+  tag: tls_issues
+  description: "NetObserv TLS and ingress errors — HTTPS failures and IPsec issues"
+
+  turns:
+    - turn_id: tls_issues
+      query: >
+        Namespace netobserv-eval-tls has HTTPS and TLS connection problems between workloads
+        over the last hour. Use NetObserv flow metrics and flows to investigate failed
+        connections, TLS errors, or related connectivity issues.
+      expected_response: >
+        Investigates TLS/HTTPS/connectivity using NetObserv tools: flow metrics and/or
+        netobserv_list_flows showing failed connections on TCP:443 or related error patterns.
+        Explains whether the issue appears to be TLS termination, backend unreachable, or
+        misconfiguration based on flow evidence from tool output.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./tls_issues/setup.sh
+  cleanup_script: ./tls_issues/cleanup.sh
+
+# --- Slow TCP RTT ---
+- conversation_group_id: tcp_rtt
+  tag: tcp_rtt
+  description: "NetObserv TCP RTT — high round-trip latency (FlowRTT)"
+
+  turns:
+    - turn_id: tcp_rtt
+      query: >
+        Application teams report slow TCP connections and high network latency between
+        services in namespace netobserv-eval-tcp-rtt. Use NetObserv to analyze TCP round-trip
+        time trends in the last hour.
+      expected_response: >
+        Analyzes TCP RTT using NetObserv flow metrics and/or flows with TimeFlowRttNs or
+        related RTT fields. Identifies namespaces or paths with elevated RTT in
+        netobserv-eval-tcp-rtt, cites numeric evidence from tool output, and notes if FlowRTT
+        data is missing.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./tcp_rtt/setup.sh
+  cleanup_script: ./tcp_rtt/cleanup.sh
