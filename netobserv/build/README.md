@@ -37,7 +37,7 @@ make deploy-flowcollector
 | `sampling` | 50 | 1 |
 | `privileged` | false | true |
 | eBPF features | commented out | DNSTracking, PacketDrop, FlowRTT, NetworkEvents |
-| `networkPolicy.additionalNamespaces` | `[]` | `openshift-mcp` |
+| `networkPolicy.additionalNamespaces` | `[]` | `openshift-mcp`, `kubernetes-mcp-server` |
 
 `NetworkEvents` requires OpenShift 4.19+. All scenarios and their required features:
 
@@ -68,6 +68,6 @@ KUBERNETES_MCP_IMAGE=quay.io/<you>/kubernetes-mcp-server:<pr-tag> \
 make connect-ols-kubernetes-mcp
 ```
 
-Update `flowcollector.yaml` `networkPolicy.additionalNamespaces` to `kubernetes-mcp-server` if you use this path. Teardown: `make teardown-kubernetes-mcp`.
+Both MCP namespaces are already allowed in `flowcollector.yaml`. Teardown: `make teardown-kubernetes-mcp`.
 
 See the root [README](../../README.md#openshift-mcp-server-setup) for the full MCP lifecycle.
