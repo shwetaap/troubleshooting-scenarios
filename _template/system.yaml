@@ -1,0 +1,62 @@
+# Evaluation framework config — adjust judge model and metrics for your team.
+# api_base is replaced at runtime with OLS_URL (do not hardcode your URL here).
+
+core:
+  max_threads: 5
+
+llm:
+  provider: "openai"
+  model: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 5000
+  timeout: 300
+  num_retries: 3
+  cache_enabled: false
+
+api:
+  enabled: true
+  api_base: https://localhost:8443
+  endpoint_type: query
+  timeout: 300
+  provider: "openai"
+  model: "gpt-4o-mini"
+  cache_enabled: false
+  extra_request_params:
+    mode: troubleshooting
+
+metrics_metadata:
+  turn_level:
+    "custom:answer_correctness":
+      description: "Correctness vs expected answer"
+      default: true
+
+output:
+  output_dir: "./eval_output"
+  base_filename: "evaluation"
+  enabled_outputs:
+    - csv
+    - json
+
+visualization:
+  figsize: [12, 8]
+  dpi: 300
+  enabled_graphs:
+    - "score_distribution"
+    - "status_breakdown"
+
+environment:
+  DEEPEVAL_TELEMETRY_OPT_OUT: "YES"
+  DEEPEVAL_DISABLE_PROGRESS_BAR: "YES"
+  LITELLM_LOG: ERROR
+
+logging:
+  source_level: INFO
+  package_level: ERROR
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  show_timestamps: true
+  package_overrides:
+    httpx: ERROR
+    urllib3: ERROR
+    matplotlib: ERROR
+    LiteLLM: WARNING
+    DeepEval: WARNING
