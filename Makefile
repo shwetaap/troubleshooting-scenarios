@@ -18,105 +18,154 @@ venv/bin/activate:
 	venv/bin/pip install --quiet git+https://github.com/lightspeed-core/lightspeed-evaluation.git
 	@printf '\033[0;32mDone.\033[0m venv ready at ./venv\n'
 
-##@ OpenShift MCP Server
+##@ MCP servers (OpenShift vs kubernetes-mcp-server)
 
-MCP_NS        ?= openshift-mcp
-OLS_NS        ?= openshift-lightspeed
-MCP_ISTIO_NS  ?= istio-system
-OPENSHIFT_MCP_INTERNAL_IMAGE="registry.redhat.io/openshift-lightspeed/openshift-mcp-server-rhel9@sha256:83f288c04aad9c742cf2cee51f45e1be1982e1fcc388d2112cf5483e381fff62"
-#
-#  Enable toolsets for the OpenShift MCP server: core and config
-#  Add additional toolsets to the list by setting TOOLSETS_ADDITIONAL separated by commas
-#
-TOOLSETS_ADDITIONAL ?= ossm
+OLS_NS ?= openshift-lightspeed
+MCP_ISTIO_NS ?= istio-system
 
-.PHONY: setup-openshift-mcp
-setup-openshift-mcp: ## Deploy the OpenShift MCP server (namespace, RBAC, config, deployment, route)
+# Namespaces — one MCP flavor per namespace
+OPENSHIFT_MCP_NS ?= openshift-mcp
+KUBERNETES_MCP_NS ?= kubernetes-mcp-server
+MCP_NS ?= $(OPENSHIFT_MCP_NS)
+
+# OpenShift MCP (fixed Red Hat image, Kiali/ossm evals — not overridable)
+OPENSHIFT_MCP_INTERNAL_IMAGE = registry.redhat.io/openshift-lightspeed/openshift-mcp-server-rhel9@sha256:83f288c04aad9c742cf2cee51f45e1be1982e1fcc388d2112cf5483e381fff62
+OPENSHIFT_MCP_TOOLSETS ?= ossm
+
+# kubernetes-mcp-server (upstream image, NetObserv evals)
+KUBERNETES_MCP_IMAGE ?= quay.io/containers/kubernetes_mcp_server:latest
+KUBERNETES_MCP_TOOLSETS ?= netobserv
+
+.PHONY: setup-openshift-mcp setup-kubernetes-mcp
+setup-openshift-mcp: ## Deploy Red Hat openshift-mcp-server (namespace openshift-mcp)
+	$(MAKE) _mcp-setup \
+	  MCP_NS=$(OPENSHIFT_MCP_NS) \
+	  MCP_DEPLOYMENT=openshift-mcp-server \
+	  MCP_IMAGE=$(OPENSHIFT_MCP_INTERNAL_IMAGE) \
+	  MCP_COMMAND=/openshift-mcp-server \
+	  MCP_CONFIG_MOUNT=/etc/mcp \
+	  TOOLSETS_ADDITIONAL=$(or $(TOOLSETS_ADDITIONAL),$(OPENSHIFT_MCP_TOOLSETS))
+
+setup-kubernetes-mcp: ## Deploy upstream kubernetes-mcp-server (namespace kubernetes-mcp-server)
+	$(MAKE) _mcp-setup \
+	  MCP_NS=$(KUBERNETES_MCP_NS) \
+	  MCP_DEPLOYMENT=kubernetes-mcp-server \
+	  MCP_IMAGE=$(KUBERNETES_MCP_IMAGE) \
+	  MCP_COMMAND=/app/kubernetes-mcp-server \
+	  MCP_CONFIG_MOUNT=/etc/kubernetes-mcp-server \
+	  TOOLSETS_ADDITIONAL=$(or $(TOOLSETS_ADDITIONAL),$(KUBERNETES_MCP_TOOLSETS))
+
+.PHONY: _mcp-setup
+_mcp-setup:
 	@set -e; \
 	ns='$(MCP_NS)'; \
+	name='$(MCP_DEPLOYMENT)'; \
 	echo "==> Creating namespace $$ns..."; \
 	oc create namespace "$$ns" --dry-run=client -o yaml | oc apply -f -; \
-	echo "==> Creating ServiceAccount..."; \
+	echo "==> Creating ServiceAccount $$name..."; \
 	{ \
 	  echo 'apiVersion: v1'; \
 	  echo 'kind: ServiceAccount'; \
 	  echo 'metadata:'; \
-	  echo '  name: openshift-mcp-server'; \
+	  echo "  name: $$name"; \
 	  echo "  namespace: $$ns"; \
 	} | oc apply -f -; \
 	echo "==> Granting cluster-admin to ServiceAccount..."; \
-	oc create clusterrolebinding openshift-mcp-server-admin \
+	oc create clusterrolebinding "$$name-admin" \
 	  --clusterrole=cluster-admin \
-	  "--serviceaccount=$$ns:openshift-mcp-server" \
+	  "--serviceaccount=$$ns:$$name" \
 	  --dry-run=client -o yaml | oc apply -f -; \
 	oc adm policy add-cluster-role-to-user cluster-admin \
-	  "system:serviceaccount:$$ns:openshift-mcp-server"
-	$(MAKE) mcp-config
+	  "system:serviceaccount:$$ns:$$name"
+	$(MAKE) _mcp-config \
+	  MCP_NS='$(MCP_NS)' \
+	  MCP_DEPLOYMENT='$(MCP_DEPLOYMENT)' \
+	  TOOLSETS_ADDITIONAL='$(TOOLSETS_ADDITIONAL)'
 	@set -e; \
 	ns='$(MCP_NS)'; \
-	image='$(OPENSHIFT_MCP_INTERNAL_IMAGE)'; \
-	echo "==> Creating Deployment..."; \
+	name='$(MCP_DEPLOYMENT)'; \
+	image='$(MCP_IMAGE)'; \
+	mcp_cmd='$(MCP_COMMAND)'; \
+	config_mount='$(MCP_CONFIG_MOUNT)'; \
+	config_file='$(MCP_CONFIG_MOUNT)/config.toml'; \
+	echo "==> Creating Deployment $$name (image=$$image)..."; \
 	{ \
 	  echo 'apiVersion: apps/v1'; \
 	  echo 'kind: Deployment'; \
 	  echo 'metadata:'; \
-	  echo '  name: openshift-mcp-server'; \
+	  echo "  name: $$name"; \
 	  echo "  namespace: $$ns"; \
 	  echo 'spec:'; \
 	  echo '  replicas: 1'; \
 	  echo '  selector:'; \
 	  echo '    matchLabels:'; \
-	  echo '      app: openshift-mcp-server'; \
+	  echo "      app: $$name"; \
 	  echo '  template:'; \
 	  echo '    metadata:'; \
 	  echo '      labels:'; \
-	  echo '        app: openshift-mcp-server'; \
+	  echo "        app: $$name"; \
 	  echo '    spec:'; \
-	  echo '      serviceAccountName: openshift-mcp-server'; \
+	  echo "      serviceAccountName: $$name"; \
 	  echo '      containers:'; \
-	  echo '      - name: openshift-mcp-server'; \
+	  echo "      - name: $$name"; \
 	  echo "        image: $$image"; \
-	  echo '        command: ["/openshift-mcp-server"]'; \
-	  echo '        args: ["--config", "/etc/mcp/config.toml"]'; \
+	  echo "        command: [\"$$mcp_cmd\"]"; \
+	  echo "        args: [\"--config\", \"$$config_file\"]"; \
 	  echo '        ports:'; \
 	  echo '        - containerPort: 8080'; \
 	  echo '        volumeMounts:'; \
 	  echo '        - name: mcp-config'; \
-	  echo '          mountPath: /etc/mcp'; \
+	  echo "          mountPath: $$config_mount"; \
 	  echo '      volumes:'; \
 	  echo '      - name: mcp-config'; \
 	  echo '        configMap:'; \
 	  echo '          name: mcp-config'; \
 	} | oc apply -f -; \
-	echo "==> Creating Service..."; \
+	echo "==> Creating Service $$name..."; \
 	{ \
 	  echo 'apiVersion: v1'; \
 	  echo 'kind: Service'; \
 	  echo 'metadata:'; \
-	  echo '  name: openshift-mcp-server'; \
+	  echo "  name: $$name"; \
 	  echo "  namespace: $$ns"; \
 	  echo 'spec:'; \
 	  echo '  selector:'; \
-	  echo '    app: openshift-mcp-server'; \
+	  echo "    app: $$name"; \
 	  echo '  ports:'; \
 	  echo '  - port: 8080'; \
 	  echo '    targetPort: 8080'; \
 	} | oc apply -f -; \
 	echo "==> Exposing OpenShift Route..."; \
-	oc get route openshift-mcp-server -n "$$ns" &>/dev/null \
-	  || oc expose service openshift-mcp-server -n "$$ns"; \
-	route_host="$$(oc get route openshift-mcp-server -n "$$ns" \
+	oc get route "$$name" -n "$$ns" &>/dev/null \
+	  || oc expose service "$$name" -n "$$ns"; \
+	route_host="$$(oc get route "$$name" -n "$$ns" \
 	  -o jsonpath='{.spec.host}' 2>/dev/null)"; \
 	echo ""; \
-	echo "==> MCP server installed! Endpoint: http://$$route_host";
+	echo "==> MCP server installed in $$ns! Route: http://$$route_host"; \
+	echo "==> In-cluster URL: http://$$name.$$ns.svc.cluster.local:8080/mcp"
 
-.PHONY: mcp-config
-mcp-config: ## Rebuild mcp-config ConfigMap and restart the pod if already running
+.PHONY: mcp-config openshift-mcp-config kubernetes-mcp-config _mcp-config
+mcp-config: openshift-mcp-config ## Alias: rebuild openshift-mcp ConfigMap
+
+openshift-mcp-config: ## Rebuild openshift-mcp ConfigMap and restart the pod
+	$(MAKE) _mcp-config \
+	  MCP_NS=$(OPENSHIFT_MCP_NS) \
+	  MCP_DEPLOYMENT=openshift-mcp-server \
+	  TOOLSETS_ADDITIONAL=$(or $(TOOLSETS_ADDITIONAL),$(OPENSHIFT_MCP_TOOLSETS))
+
+kubernetes-mcp-config: ## Rebuild kubernetes-mcp-server ConfigMap and restart the pod
+	$(MAKE) _mcp-config \
+	  MCP_NS=$(KUBERNETES_MCP_NS) \
+	  MCP_DEPLOYMENT=kubernetes-mcp-server \
+	  TOOLSETS_ADDITIONAL=$(or $(TOOLSETS_ADDITIONAL),$(KUBERNETES_MCP_TOOLSETS))
+
+_mcp-config:
 	@set -e; \
 	ns='$(MCP_NS)'; \
+	name='$(MCP_DEPLOYMENT)'; \
 	istio_ns='$(MCP_ISTIO_NS)'; \
 	additional="$$(printf '%s' '$(TOOLSETS_ADDITIONAL)' | tr -d '"')"; \
-	echo "==> Building mcp-config ConfigMap (toolsets: core,config,$$additional)..."; \
+	echo "==> Building mcp-config in $$ns (toolsets: core,config,$$additional)..."; \
 	ts='["core","config"'; \
 	IFS=,; \
 	for t in $$additional; do \
@@ -134,22 +183,33 @@ mcp-config: ## Rebuild mcp-config ConfigMap and restart the pod if already runni
 	  --from-file=config.toml=/tmp/_mcp-config.toml \
 	  -n "$$ns" --dry-run=client -o yaml | oc apply -f -; \
 	rm -f /tmp/_mcp-config.toml; \
-	if oc get deployment openshift-mcp-server -n "$$ns" &>/dev/null; then \
-	  echo "==> Restarting openshift-mcp-server to pick up new config..."; \
-	  oc rollout restart deployment/openshift-mcp-server -n "$$ns"; \
-	  oc rollout status deployment/openshift-mcp-server -n "$$ns"; \
+	if oc get deployment "$$name" -n "$$ns" &>/dev/null; then \
+	  echo "==> Restarting $$name to pick up new config..."; \
+	  oc rollout restart "deployment/$$name" -n "$$ns"; \
+	  oc rollout status "deployment/$$name" -n "$$ns"; \
 	else \
-	  echo "==> Deployment not found — skipping restart (run 'make setup-openshift-mcp' first)."; \
+	  echo "==> Deployment $$name not found — skipping restart."; \
 	fi
 
-.PHONY: connect-ols-mcp
-connect-ols-mcp: ## Patch OLSConfig/cluster to register the openshift-mcp MCP server and restart OLS
+.PHONY: connect-ols-mcp connect-ols-openshift-mcp connect-ols-kubernetes-mcp _connect-ols-mcp
+connect-ols-mcp: connect-ols-openshift-mcp ## Alias: register openshift-mcp in OLSConfig
+
+connect-ols-openshift-mcp: ## Register openshift-mcp-server in OLSConfig/cluster
+	$(MAKE) _connect-ols-mcp \
+	  MCP_OLS_NAME=openshift-mcp \
+	  MCP_URL=http://openshift-mcp-server.$(OPENSHIFT_MCP_NS):8080/mcp
+
+connect-ols-kubernetes-mcp: ## Register kubernetes-mcp-server in OLSConfig/cluster
+	$(MAKE) _connect-ols-mcp \
+	  MCP_OLS_NAME=kubernetes-mcp \
+	  MCP_URL=http://kubernetes-mcp-server.$(KUBERNETES_MCP_NS):8080/mcp
+
+_connect-ols-mcp:
 	@set -e; \
-	mcp_url="http://openshift-mcp-server.$(MCP_NS):8080/mcp"; \
-	echo "==> Patching OLSConfig/cluster with mcpServers (url=$$mcp_url)..."; \
+	echo "==> Patching OLSConfig/cluster (name=$(MCP_OLS_NAME), url=$(MCP_URL))..."; \
 	patch="$$(printf \
-	  '{"spec":{"featureGates":["MCPServer"],"mcpServers":[{"name":"openshift-mcp","headers":[{"name":"kubernetes-authorization","valueFrom":{"type":"kubernetes"}}],"url":"%s","timeout":30}]}}' \
-	  "$$mcp_url")"; \
+	  '{"spec":{"featureGates":["MCPServer"],"mcpServers":[{"name":"%s","headers":[{"name":"kubernetes-authorization","valueFrom":{"type":"kubernetes"}}],"url":"%s","timeout":120}]}}' \
+	  '$(MCP_OLS_NAME)' '$(MCP_URL)')"; \
 	oc patch olsconfig cluster --type=merge -p "$$patch"; \
 	echo "==> OLSConfig/cluster updated."; \
 	echo "==> Restarting lightspeed-app-server to pick up new config..."; \
@@ -157,21 +217,34 @@ connect-ols-mcp: ## Patch OLSConfig/cluster to register the openshift-mcp MCP se
 	oc rollout status deployment/lightspeed-app-server -n "$(OLS_NS)"; \
 	echo "==> OLS is ready."
 
-.PHONY: teardown-openshift-mcp
-teardown-openshift-mcp: ## Remove the OpenShift MCP server and disconnect it from OLS
+.PHONY: teardown-openshift-mcp teardown-kubernetes-mcp _teardown-mcp
+teardown-openshift-mcp: ## Remove openshift-mcp namespace and disconnect from OLS
+	$(MAKE) _teardown-mcp \
+	  MCP_NS=$(OPENSHIFT_MCP_NS) \
+	  MCP_DEPLOYMENT=openshift-mcp-server \
+	  MCP_OLS_NAME=openshift-mcp
+
+teardown-kubernetes-mcp: ## Remove kubernetes-mcp-server namespace and disconnect from OLS
+	$(MAKE) _teardown-mcp \
+	  MCP_NS=$(KUBERNETES_MCP_NS) \
+	  MCP_DEPLOYMENT=kubernetes-mcp-server \
+	  MCP_OLS_NAME=kubernetes-mcp
+
+_teardown-mcp:
 	@set -e; \
 	ns='$(MCP_NS)'; \
-	echo "==> Disconnecting openshift-mcp from OLSConfig/cluster..."; \
+	name='$(MCP_DEPLOYMENT)'; \
+	echo "==> Removing MCP server $(MCP_OLS_NAME) from OLSConfig/cluster..."; \
 	oc patch olsconfig cluster --type=json \
-	  -p '[{"op":"remove","path":"/spec/mcpServers"}]' 2>/dev/null || true; \
+	  -p='[{"op":"remove","path":"/spec/mcpServers"}]' 2>/dev/null || true; \
 	echo "==> Restarting lightspeed-app-server..."; \
 	oc rollout restart deployment/lightspeed-app-server -n "$(OLS_NS)" 2>/dev/null || true; \
-	echo "==> Removing MCP server resources from $$ns..."; \
-	oc delete deployment  openshift-mcp-server -n "$$ns" --ignore-not-found; \
-	oc delete service     openshift-mcp-server -n "$$ns" --ignore-not-found; \
-	oc delete route       openshift-mcp-server -n "$$ns" --ignore-not-found; \
-	oc delete configmap   mcp-config           -n "$$ns" --ignore-not-found; \
-	oc delete clusterrolebinding openshift-mcp-server-admin --ignore-not-found; \
-	oc delete serviceaccount openshift-mcp-server -n "$$ns" --ignore-not-found; \
+	echo "==> Removing MCP resources from $$ns..."; \
+	oc delete deployment  "$$name" -n "$$ns" --ignore-not-found; \
+	oc delete service     "$$name" -n "$$ns" --ignore-not-found; \
+	oc delete route       "$$name" -n "$$ns" --ignore-not-found; \
+	oc delete configmap   mcp-config -n "$$ns" --ignore-not-found; \
+	oc delete clusterrolebinding "$$name-admin" --ignore-not-found; \
+	oc delete serviceaccount "$$name" -n "$$ns" --ignore-not-found; \
 	oc delete namespace "$$ns" --ignore-not-found; \
-	echo "==> Teardown complete."
+	echo "==> Teardown complete ($$ns)."

@@ -1,0 +1,50 @@
+# FlowCollector for NetObserv troubleshooting evals (name must be "cluster").
+#
+# Differs from netobserv-operator deploy-sample-cr:
+#   - sampling: 1 (reliable flow export for short-lived eval workloads)
+#   - privileged: true + all eBPF features used by eval scenarios
+#   - networkPolicy.additionalNamespaces: openshift-mcp + kubernetes-mcp-server (both MCP deploy paths)
+#
+# Requires: NetObserv operator only — Loki is deployed by the operator via installDemoLoki.
+# NetworkEvents requires OpenShift 4.19+.
+apiVersion: flows.netobserv.io/v1beta2
+kind: FlowCollector
+metadata:
+  name: cluster
+spec:
+  namespace: netobserv
+  deploymentModel: Service
+  networkPolicy:
+    enable: true
+    additionalNamespaces:
+      - openshift-mcp
+      - kubernetes-mcp-server
+  agent:
+    type: eBPF
+    ebpf:
+      sampling: 1
+      privileged: true
+      cacheActiveTimeout: 15s
+      cacheMaxFlows: 120000
+      features:
+        - DNSTracking
+        - PacketDrop
+        - FlowRTT
+        - NetworkEvents
+      excludeInterfaces:
+        - lo
+  processor:
+    consumerReplicas: 1
+    metrics:
+      disableAlerts: []
+  loki:
+    enable: true
+    mode: Monolithic
+    monolithic:
+      installDemoLoki: true
+  prometheus:
+    querier:
+      enable: true
+  consolePlugin:
+    enable: true
+  exporters: []
