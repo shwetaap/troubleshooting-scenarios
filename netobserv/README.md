@@ -13,7 +13,7 @@ Evaluation scenarios that test how well an AI assistant — backed by the OpenSh
 export OPENAI_API_KEY=<your-key>
 make setup     # install venv + OLS + MCP (netobserv toolset) + NetObserv operator + FlowCollector
 make evals     # run all scenarios
-make teardown  # remove NetObserv + MCP
+make cleanup  # remove NetObserv + MCP
 ```
 
 `make setup` handles everything: venv creation, OLS operator install, MCP server deployment with the `netobserv` toolset, and NetObserv operator + FlowCollector installation via [`build/netobserv.mk`](build/netobserv.mk). See [`build/README.md`](build/README.md) for details on NetObserv variables and manual steps.

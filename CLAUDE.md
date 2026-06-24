@@ -32,7 +32,7 @@ All commands run from within a suite directory (e.g., `cd kiali-ossm/`).
 ```bash
 make setup     # Install venv + OLS operator + MCP server + suite dependencies
 make evals     # Run all scenarios (auto port-forward to OLS)
-make teardown   # Remove suite dependencies + MCP server (OLS stays)
+make cleanup   # Remove suite dependencies + MCP server (OLS stays)
 ```
 
 Run a single scenario:
@@ -59,7 +59,7 @@ Each suite Makefile declares a `SCENARIOS` variable and includes `../scripts/eva
 
 | Script | Purpose |
 |--------|---------|
-| `eval.mk` | Makefile include: target generation, _setup-shared, _teardown-shared |
+| `eval.mk` | Makefile include: target generation, _setup-shared, _cleanup-shared |
 | `setup-venv.sh` | Create venv with lightspeed-eval (idempotent) |
 | `setup-ols.sh` | Install OLS operator + OLSConfig (idempotent) |
 | `setup-mcp.sh` | Deploy MCP server with configurable toolsets |
@@ -71,7 +71,7 @@ Each suite Makefile declares a `SCENARIOS` variable and includes `../scripts/eva
 The root Makefile has maintenance targets only:
 
 ```bash
-make teardown        # Remove OLS operator + local venv
+make cleanup        # Remove OLS operator + local venv
 ```
 
 ## Architecture: generic/01-payments-api-failure (Database Connection Exhaustion)

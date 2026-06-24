@@ -35,11 +35,11 @@ include build/ossm.mk
 setup: _setup-shared
 	$(MAKE) setup-kiali-openshift
 
-# Teardown: Bookinfo + OSSM + shared infra
-.PHONY: teardown
-teardown:
+# Cleanup: Bookinfo + OSSM + shared infra
+.PHONY: cleanup
+cleanup:
 	$(MAKE) clean-kiali-openshift
-	$(MAKE) _teardown-shared
+	$(MAKE) _cleanup-shared
 
 # Without-MCP variant
 .PHONY: check_mesh_status_no_kiali-eval

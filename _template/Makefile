@@ -3,7 +3,7 @@
 # Usage:
 #   make setup     Install venv + OLS + MCP + suite dependencies
 #   make evals     Run all scenarios
-#   make teardown  Remove suite dependencies + MCP
+#   make cleanup  Remove suite dependencies + MCP
 
 # Scenarios (must match tag: values in evals.yaml)
 SCENARIOS = _example_scenario
@@ -23,8 +23,8 @@ include ../scripts/eval.mk
 setup: _setup-shared
 	@echo "Add suite-specific cluster setup here (e.g. operator install, CR apply)"
 
-# Teardown: suite dependencies + shared infra
-.PHONY: teardown
-teardown:
-	@echo "Add suite-specific teardown here"
-	$(MAKE) _teardown-shared
+# Cleanup: suite dependencies + shared infra
+.PHONY: cleanup
+cleanup:
+	@echo "Add suite-specific cleanup here"
+	$(MAKE) _cleanup-shared

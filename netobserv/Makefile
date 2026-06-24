@@ -22,8 +22,8 @@ include build/netobserv.mk
 setup: _setup-shared
 	$(MAKE) setup-netobserv-openshift
 
-# Teardown: NetObserv operator + shared infra
-.PHONY: teardown
-teardown:
+# Cleanup: NetObserv operator + shared infra
+.PHONY: cleanup
+cleanup:
 	$(MAKE) clean-netobserv-openshift
-	$(MAKE) _teardown-shared
+	$(MAKE) _cleanup-shared

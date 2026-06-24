@@ -11,4 +11,4 @@ oc delete configmap   mcp-config        -n "$MCP_NS" --ignore-not-found
 oc delete clusterrolebinding "${MCP_DEPLOYMENT}-admin" --ignore-not-found
 oc delete serviceaccount "$MCP_DEPLOYMENT" -n "$MCP_NS" --ignore-not-found
 oc delete namespace "$MCP_NS" --ignore-not-found
-echo "==> MCP teardown complete (${MCP_NS})."
+echo "==> MCP cleanup complete (${MCP_NS})."

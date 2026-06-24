@@ -20,7 +20,7 @@ export OPENAI_API_KEY=<your-key>
 cd kiali-ossm          # or: cd netobserv
 make setup             # install venv + OLS + MCP server + suite dependencies
 make evals             # run all scenarios (auto port-forward)
-make teardown          # remove suite dependencies + MCP server
+make cleanup          # remove suite dependencies + MCP server
 ```
 
 Run a single scenario:
@@ -38,16 +38,16 @@ make check_mesh_status-eval
 5. Connects OLS to the MCP server
 6. Installs suite-specific dependencies (e.g., Bookinfo, FlowCollector)
 
-### What `make teardown` does
+### What `make cleanup` does
 
 1. Removes suite-specific cluster resources
 2. Disconnects OLS from the MCP server
-3. Tears down the MCP server namespace
+3. Removes the MCP server namespace
 
-OLS itself is **not** removed by suite teardown — it's shared across suites. To remove OLS and the local venv:
+OLS itself is **not** removed by suite cleanup — it's shared across suites. To remove OLS and the local venv:
 
 ```bash
-make teardown       # from repo root
+make cleanup       # from repo root
 ```
 
 ## Requirements

@@ -19,4 +19,4 @@ fi
 oc delete operatorgroup openshift-lightspeed -n "$OLS_NS" --ignore-not-found 2>/dev/null || true
 oc delete namespace "$OLS_NS" --ignore-not-found 2>/dev/null || true
 
-echo "==> OLS teardown complete."
+echo "==> OLS cleanup complete."

@@ -36,14 +36,14 @@ _setup-shared:
 	  OLS_NS=$(OLS_NS) \
 	  bash $(SCRIPTS_DIR)/connect-ols-mcp.sh
 
-# Shared teardown (disconnect + remove MCP; OLS stays)
+# Shared cleanup (disconnect + remove MCP; OLS stays)
 
-.PHONY: _teardown-shared
-_teardown-shared:
+.PHONY: _cleanup-shared
+_cleanup-shared:
 	@OLS_NS=$(OLS_NS) \
 	  bash $(SCRIPTS_DIR)/disconnect-ols-mcp.sh
 	@MCP_NS=$(MCP_NS) MCP_DEPLOYMENT=$(MCP_DEPLOYMENT) \
-	  bash $(SCRIPTS_DIR)/teardown-mcp.sh
+	  bash $(SCRIPTS_DIR)/cleanup-mcp.sh
 
 # Run all scenarios
 
@@ -74,7 +74,7 @@ help:
 	@echo "  make setup              Install venv + OLS + MCP + suite dependencies"
 	@echo "  make evals              Run all scenarios"
 	@$(foreach s,$(SCENARIOS),echo "  make $(s)-eval";)
-	@echo "  make teardown           Remove suite dependencies + MCP"
+	@echo "  make cleanup           Remove suite dependencies + MCP"
 	@echo ""
 	@echo "  OLS_URL=$(OLS_URL)  (override with OLS_URL=https://...)"
 	@echo ""

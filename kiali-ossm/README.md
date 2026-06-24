@@ -13,7 +13,7 @@ Evaluation scenarios that test how well an AI assistant — backed by an MCP ser
 export OPENAI_API_KEY=<your-key>
 make setup     # install venv + OLS + MCP (ossm toolset) + OSSM/Kiali/Bookinfo
 make evals     # run all scenarios
-make teardown  # remove Bookinfo + OSSM + MCP
+make cleanup  # remove Bookinfo + OSSM + MCP
 ```
 
 `make setup` handles everything: venv creation, OLS operator install, MCP server deployment with the `ossm` toolset, and OSSM/Kiali/Bookinfo installation via [`build/ossm.mk`](build/ossm.mk). See [`build/README.md`](build/README.md) for details on OSSM variables and manual steps.

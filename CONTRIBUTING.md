@@ -13,14 +13,14 @@ cd my-suite
 
 ```
 my-suite/
-├── Makefile                    # Declares scenarios, MCP config, setup/teardown
+├── Makefile                    # Declares scenarios, MCP config, setup/cleanup
 ├── system.yaml                 # Evaluation framework config (judge model, metrics)
 ├── evals.yaml                  # Conversation definitions (queries + expected responses)
 ├── README.md                   # Team documentation
 ├── build/                      # Optional: suite-specific setup scripts, operator CRs
 ├── my_scenario/
 │   ├── setup.sh                # Runs before the conversation starts
-│   ├── teardown.sh              # Runs after the conversation ends
+│   ├── cleanup.sh              # Runs after the conversation ends
 │   └── fixtures/
 │       └── manifest.yaml       # Kubernetes manifests deployed by setup.sh
 ├── another_scenario/
@@ -50,13 +50,13 @@ Each scenario is a conversation with one or more turns. The `tag` field must mat
         - custom:answer_correctness
 
   setup_script: ./my_scenario/setup.sh
-  teardown_script: ./my_scenario/teardown.sh
+  cleanup_script: ./my_scenario/cleanup.sh
 ```
 
-### Scenario setup/teardown scripts
+### Scenario setup/cleanup scripts
 
 - `setup.sh` runs before the conversation — deploy workloads, inject faults, wait for signals
-- `teardown.sh` runs after — delete namespaces, remove fixtures
+- `cleanup.sh` runs after — delete namespaces, remove fixtures
 - Both must be executable (`chmod +x`)
 - Use `oc apply -f fixtures/manifest.yaml` for Kubernetes resources
 
@@ -81,10 +81,10 @@ include ../scripts/eval.mk
 setup: _setup-shared
 	# Team-specific cluster setup (operator install, CR apply, etc.)
 
-.PHONY: teardown
-teardown:
-	# Team-specific teardown
-	$(MAKE) _teardown-shared
+.PHONY: cleanup
+cleanup:
+	# Team-specific cleanup
+	$(MAKE) _cleanup-shared
 ```
 
 ### Variables
@@ -102,7 +102,7 @@ teardown:
 | Target | Description |
 |--------|-------------|
 | `_setup-shared` | venv + preflight + OLS install + MCP deploy + OLS connect |
-| `_teardown-shared` | OLS disconnect + MCP teardown |
+| `_cleanup-shared` | OLS disconnect + MCP cleanup |
 | `evals` | Run all scenarios |
 | `<tag>-eval` | Run a single scenario |
 | `help` | List available targets |
@@ -113,7 +113,7 @@ teardown:
 export OPENAI_API_KEY=<your-key>
 make setup
 make evals
-make teardown
+make cleanup
 ```
 
 ## 6. Shared scripts reference
@@ -124,11 +124,11 @@ All shared scripts live in `scripts/` at the repo root. Teams should not need to
 |--------|---------|
 | `setup-venv.sh` | Create venv with lightspeed-eval (idempotent) |
 | `setup-ols.sh` | Install OLS operator + OLSConfig (idempotent) |
-| `teardown-ols.sh` | Remove OLS operator |
+| `cleanup-ols.sh` | Remove OLS operator |
 | `setup-mcp.sh` | Deploy MCP server |
-| `teardown-mcp.sh` | Remove MCP server |
+| `cleanup-mcp.sh` | Remove MCP server |
 | `connect-ols-mcp.sh` | Register MCP in OLSConfig + restart |
 | `disconnect-ols-mcp.sh` | Remove MCP from OLSConfig + restart |
 | `preflight.sh` | Check cluster + OLS readiness |
-| `run-evals.sh` | Port-forward + lightspeed-eval + teardown |
+| `run-evals.sh` | Port-forward + lightspeed-eval + cleanup |
 | `mcp-config.sh` | Build MCP config.toml ConfigMap |

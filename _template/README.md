@@ -19,7 +19,7 @@
 export OPENAI_API_KEY=<your-key>
 make setup     # install OLS + MCP + suite dependencies
 make evals     # run all scenarios
-make teardown   # remove suite dependencies + MCP
+make cleanup   # remove suite dependencies + MCP
 ```
 
 Run a single scenario:
