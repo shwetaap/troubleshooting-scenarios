@@ -1,0 +1,20 @@
+# Evaluation conversations — one entry per scenario.
+# tag: must match the name listed in SCENARIOS in the Makefile.
+
+- conversation_group_id: _example_scenario
+  tag: _example_scenario
+  description: "Example: verify the agent can list namespaces using cluster tools"
+
+  turns:
+    - turn_id: ask
+      query: >
+        What namespaces exist in this cluster?
+      expected_response: >
+        The agent should list the namespaces in the cluster using
+        available tools. The response should include real namespace
+        names from the cluster, not generic guesses.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./_example_scenario/setup.sh
+  cleanup_script: ./_example_scenario/cleanup.sh

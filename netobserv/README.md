@@ -2,69 +2,21 @@
 
 Evaluation scenarios that test how well an AI assistant — backed by the OpenShift MCP server with the NetObserv toolset and OpenShift Lightspeed — can investigate network observability problems on a live OpenShift cluster.
 
----
-
 ## Prerequisites
 
-### 1. Cluster login
+- OpenShift cluster accessible via `oc login`
+- `OPENAI_API_KEY` exported
 
-You must be logged in to a running OpenShift cluster.
-
-```bash
-oc login <cluster-api-url>
-```
-
-### 2. NetObserv operator and FlowCollector
-
-All scenarios assume NetObserv is installed and `FlowCollector/cluster` is Ready. See [`build/README.md`](build/README.md) for a full description of every step and all available variables.
-
-```bash
-make setup-netobserv-openshift
-```
-
-Installs the NetObserv operator via OLM, applies [`build/flowcollector.yaml`](build/flowcollector.yaml) (a `FlowCollector` tuned for these scenarios — sampling 1, eBPF features, MCP network policy; `installDemoLoki: true` deploys Loki), and waits for `FlowCollector/cluster` Ready.
-
-### 3. MCP server with NetObserv toolset
-
-Same path as [kiali-ossm](../kiali-ossm/README.md): deploy **openshift-mcp-server** from the repository root with the `netobserv` toolset enabled:
-
-```bash
-make setup-openshift-mcp TOOLSETS_ADDITIONAL=netobserv
-make connect-ols-mcp
-```
-
-See the root [README](../README.md#openshift-mcp-server-setup). To test an upstream PR before the toolset ships in openshift-mcp-server, use `make setup-kubernetes-mcp` with `KUBERNETES_MCP_IMAGE` — see [`build/README.md`](build/README.md).
-
-### 4. OpenShift Lightspeed (OLS)
-
-Evals call OLS `/v1/query`. The operator serves **HTTPS on port 8443** inside the pod (`lightspeed-service-api`, container port `https`) — not HTTP on 8080.
-
-**Option A — cluster Route** (simplest, no port-forward):
+## Quick start
 
 ```bash
 export OPENAI_API_KEY=<your-key>
-OLS_URL=$(make -s ols-route-url) make dns_nxdomain-test
+make setup     # install venv + OLS + MCP (netobserv toolset) + NetObserv operator + FlowCollector
+make evals     # run all scenarios
+make cleanup  # remove NetObserv + MCP
 ```
 
-**Option B — port-forward** to localhost:
-
-Terminal 1:
-
-```bash
-make ols-port-forward
-# oc port-forward -n openshift-lightspeed deployment/lightspeed-app-server 8443:8443
-```
-
-Terminal 2:
-
-```bash
-export OPENAI_API_KEY=<your-key>
-make dns_nxdomain-test   # default OLS_URL=https://localhost:8443
-```
-
-See [openshift/lightspeed-service](https://github.com/openshift/lightspeed-service) for operator install and `OLSConfig`.
-
----
+`make setup` handles everything: venv creation, OLS operator install, MCP server deployment with the `netobserv` toolset, and NetObserv operator + FlowCollector installation via [`build/netobserv.mk`](build/netobserv.mk). See [`build/README.md`](build/README.md) for details on NetObserv variables and manual steps.
 
 ## Scenarios
 
@@ -83,91 +35,67 @@ Setup scripts wait for workload traffic, then **`wait_for_netobserv_warmup`** (d
 
 ### `dns_latency`
 
-**Tag:** `dns_latency`
-
 Applications report slow DNS lookups. The agent must use NetObserv flow metrics or flow logs to identify affected workloads.
 
 ```bash
-make dns_latency-test
+make dns_latency-eval
 ```
 
 ### `dns_nxdomain`
 
-**Tag:** `dns_nxdomain`
-
 DNS resolution failures in `netobserv-eval-dns-nxdomain`. The agent must find NXDOMAIN evidence in flow metrics and/or flow logs.
 
 ```bash
-make dns_nxdomain-test
+make dns_nxdomain-eval
 ```
 
 ### `packet_drops_kernel`
 
-**Tag:** `packet_drops_kernel`
-
 Kernel-level packet drops in `netobserv-eval-drops-kernel`. The agent must distinguish kernel drops from policy drops using NetObserv flow data.
 
 ```bash
-make packet_drops_kernel-test
+make packet_drops_kernel-eval
 ```
 
 ### `packet_drops_policy`
 
-**Tag:** `packet_drops_policy`
-
 NetworkPolicy blocking traffic in `netobserv-eval-drops-policy`. The agent must find policy-related drops (`OVS_DROP_EXPLICIT`, `packetLoss=dropped`) between workloads.
 
 ```bash
-make packet_drops_policy-test
+make packet_drops_policy-eval
 ```
 
 ### `tls_issues`
 
-**Tag:** `tls_issues`
-
 HTTPS/TLS connection problems in `netobserv-eval-tls`. The agent must investigate failed connections and TLS-related flow evidence.
 
 ```bash
-make tls_issues-test
+make tls_issues-eval
 ```
 
 ### `tcp_rtt`
 
-**Tag:** `tcp_rtt`
-
 High TCP round-trip time in `netobserv-eval-tcp-rtt`. The agent must cite elevated RTT in flow metrics and `TimeFlowRttNs` in flows.
 
 ```bash
-make tcp_rtt-test
+make tcp_rtt-eval
 ```
-
----
 
 ## Running all scenarios
 
-From the **repository root**, install the evaluation CLI once (creates `venv/` with `lightspeed-eval`):
-
-```bash
-make setup-ols-evaluation
-```
-
-The judge LLM requires an OpenAI API key. Export it before running any test target:
-
 ```bash
 export OPENAI_API_KEY=<your-key>
-```
-
-Then run scenarios from this directory (with OLS reachable — see [Prerequisites §4](README.md#4-openshift-lightspeed-ols)):
-
-```bash
-make test              # all scenarios
-make dns_latency-test  # single scenario
+make evals
 ```
 
 Results are written to `results/`.
 
----
+To use a cluster Route instead of auto port-forward:
+
+```bash
+OLS_URL=https://<ols-route-host> make evals
+```
 
 ## Evaluation framework
 
-Scenarios are scored by a judge LLM (configured in [`system.yaml`](system.yaml)) using the `custom:answer_correctness` metric per turn. The framework is [`lightspeed-eval`](https://github.com/lightspeed-core/lightspeed-evaluation); install it with `make setup-ols-evaluation` from the repository root (see [`Makefile`](../Makefile)).
+Scenarios are scored by a judge LLM (configured in [`system.yaml`](system.yaml)) using the `custom:answer_correctness` metric per turn. The framework is [`lightspeed-eval`](https://github.com/lightspeed-core/lightspeed-evaluation).

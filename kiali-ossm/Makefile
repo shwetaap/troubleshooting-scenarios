@@ -1,85 +1,50 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# scenarios/scenarios.mk  —  evaluation targets
-#
-# Included by the root Makefile. Variables defined there (OPENAI_KEY_FILE,
-# GEMINI_KEY_FILE, …) are available here because include merges both files
-# at parse time.
-#
-# All conversations are defined in scenarios/evals.yaml.
-# Add a new conversation there, then optionally add an individual target below.
-# ──────────────────────────────────────────────────────────────────────────────
+# kiali-ossm evaluation scenarios
 
-include build/ossm.mk
+# Scenarios (must match tag: values in evals.yaml)
+SCENARIOS = check_mesh_status \
+            check_istio_objects_status \
+            check_bookinfo_services \
+            check_latency_bookinfo_issue \
+            fix_bookinfo_routing \
+            fix_bookinfo_fault_injection \
+            troubleshoot_latency_trace
 
-SYSTEM_CONFIG = ./system.yaml
-EVALS = ./evals.yaml
-RESULTS_DIR = ./results
-
+# Cluster platform
 CLUSTER ?= openshift
 
 ifeq ($(CLUSTER),kind)
-  KUBECTL        ?= kubectl
-  KIALI_ENDPOINT ?= http://localhost:20001/
-  # Get a short-lived token from the kiali service account
-  _AUTHTOKEN   = $(shell kubectl -n istio-system create token kiali --duration=8h 2>/dev/null)
+  export KUBECTL        ?= kubectl
+  export KIALI_ENDPOINT ?= http://localhost:20001/
 else
-  KUBECTL        ?= oc
-  KIALI_ENDPOINT ?= https://kiali-istio-system.apps-crc.testing/
-  _AUTHTOKEN   = $(shell oc whoami -t 2>/dev/null)
+  export KUBECTL        ?= oc
+  export KIALI_ENDPOINT ?= https://kiali-istio-system.apps-crc.testing/
 endif
 
-EVAL_BASE = KUBECTL=$(KUBECTL) \
-            KIALI_ENDPOINT=$(KIALI_ENDPOINT) \
-			API_KEY=$(_AUTHTOKEN) \
-            ../venv/bin/lightspeed-eval \
-            --system-config $(SYSTEM_CONFIG) \
-            --output-dir $(RESULTS_DIR) \
-            --eval-data $(EVALS)
+# MCP config
+MCP_TOOLSETS    = core,config,ossm
+MCP_KIALI_URL  ?= https://kiali.istio-system:20001/
 
-.PHONY: test test-without-mcp check_mesh_status-test
+# Shared infrastructure
+include ../scripts/eval.mk
 
-# ── all / test: run every conversation in evals.yaml ─────────────────────────
-test:   check_mesh_status-test \
-		check_istio_objects_status-test \
-		check_bookinfo_services-test \
-		check_latency_bookinfo_issue-test \
-		fix_bookinfo_routing-test \
-		fix_bookinfo_fault_injection-test \
-		troubleshoot_latency_trace-test
+# Team infrastructure (OSSM/Kiali/Bookinfo)
+include build/ossm.mk
 
-test-without-mcp: check_mesh_status-test-without-mcp
+# Setup: shared infra + OSSM + Bookinfo
+.PHONY: setup
+setup: _setup-shared
+	$(MAKE) setup-kiali-openshift
 
-# ── Individual conversation targets ───────────────────────────────────────────
+# Cleanup: Bookinfo + OSSM + shared infra
+.PHONY: cleanup
+cleanup:
+	$(MAKE) clean-kiali-openshift
+	$(MAKE) _cleanup-shared
 
-fix_bookinfo_routing-test:
-	$(EVAL_BASE) \
-	  --tag fix_bookinfo_routing
-
-fix_bookinfo_fault_injection-test:
-	$(EVAL_BASE) \
-	  --tag fault_injection_bookinfo
-
-troubleshoot_latency_trace-test:
-	$(EVAL_BASE) \
-	  --tag troubleshoot_latency_trace
-
-check_mesh_status-test:
-	$(EVAL_BASE) \
-	  --tag check_mesh_status
-
-check_bookinfo_services-test:
-	$(EVAL_BASE) \
-	  --tag check_bookinfo_services
-
-check_latency_bookinfo_issue-test:
-	$(EVAL_BASE) \
-	  --tag latency_bookinfo_issue
-
-check_istio_objects_status-test:
-	$(EVAL_BASE) \
-	  --tag check_istio_objects_status
-
-# No MCP Tests
-check_mesh_status-test-without-mcp:
-	$(EVAL_BASE) \
-	  --tag no_kiali			
+# Without-MCP variant
+.PHONY: check_mesh_status_no_kiali-eval
+check_mesh_status_no_kiali-eval:
+	@bash $(SCRIPTS_DIR)/run-evals.sh \
+	  --system-config $(SYSTEM_CONFIG) --evals $(EVALS) \
+	  --results-dir $(RESULTS_DIR) --ols-url $(OLS_URL) \
+	  --tag check_mesh_status_no_kiali

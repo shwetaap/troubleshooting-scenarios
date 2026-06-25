@@ -4,44 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Purpose
 
-This repository contains reproducible OpenShift troubleshooting demo scenarios for teaching AI-assisted incident response. Each scenario deploys a realistic microservice environment, introduces a fault, and requires an AI assistant to diagnose the root cause.
+This repository contains evaluation suites for AI-assisted troubleshooting on OpenShift. Each eval suite owns a top-level directory with scenarios that deploy faults on a live cluster, send queries to OpenShift Lightspeed (OLS), and score responses with a judge LLM using the [lightspeed-evaluation](https://github.com/lightspeed-core/lightspeed-evaluation) framework.
+
+The `generic/` directory contains standalone fault-injection demos that do not use the eval framework.
 
 ## Repository Structure
 
-Each top-level directory is an independent scenario with its own Makefile, manifests, application code, and scripts.
+```
+scripts/          Shared shell scripts and eval.mk (MCP, OLS, venv, port-forward)
+_template/        Copyable skeleton for new eval suites
+kiali-ossm/       Kiali/OSSM service-mesh evaluation scenarios
+netobserv/        NetObserv network observability evaluation scenarios
+generic/          Standalone troubleshooting demos (deploy/break/fix lifecycle)
+```
 
-## Working with Scenarios
+## Working with Eval Suites
 
-All commands run from within a scenario directory (e.g., `cd 01-payments-api-failure/`).
+All commands run from within a suite directory (e.g., `cd kiali-ossm/`).
 
 ### Prerequisites
 
 - `oc login` to an OpenShift 4.x cluster
+- `OPENAI_API_KEY` exported
 
-### Lifecycle Commands (via Make)
-
-Each scenario exposes a common set of Make targets. Not all targets exist in every scenario.
-
-```bash
-make deploy          # Deploy healthy state
-make break           # Introduce the fault, wait for failure + alert
-make fix             # Roll back to healthy state
-make cleanup         # Delete all demo resources
-make delete-history  # Reset Prometheus TSDB and restart pods
-make update-images     # Rebuild and push container images to Quay.io
-```
-
-Scenario-specific targets (01-payments-api-failure only):
+### Lifecycle Commands
 
 ```bash
-make deploy-easy       # Deploy with per-service DB users (easier diagnosis)
-make break-redherring  # Add a red herring (CrashLoopBackOff)
-make fix-redherring    # Remove the red herring
-make break-network     # Block egress from payments-api via NetworkPolicy
-make fix-network       # Remove the deny-all-egress NetworkPolicy
+make setup     # Install venv + OLS operator + MCP server + suite dependencies
+make evals     # Run all scenarios (auto port-forward to OLS)
+make cleanup   # Remove suite dependencies + MCP server (OLS stays)
 ```
 
-## Architecture: 01-payments-api-failure (Database Connection Exhaustion)
+Run a single scenario:
+
+```bash
+make check_mesh_status-eval
+```
+
+### How It Works
+
+Each suite Makefile declares a `SCENARIOS` variable and includes `../scripts/eval.mk`, which auto-generates `<scenario>-eval` targets. The shared `run-evals.sh` script handles system.yaml URL replacement, port-forward lifecycle, and `lightspeed-eval` invocation.
+
+### Key Files per Team
+
+- `Makefile` — declares SCENARIOS, MCP config, setup/cleanup targets
+- `system.yaml` — evaluation framework config (judge model, metrics, output)
+- `evals.yaml` — conversation definitions (queries + expected responses, with tags matching SCENARIOS)
+- `build/` — suite-specific setup scripts and cluster resources
+- `<scenario>/setup.sh` — runs before the conversation (deploy fixtures)
+- `<scenario>/cleanup.sh` — runs after (remove fixtures)
+- `<scenario>/fixtures/` — Kubernetes manifests
+
+### Shared Scripts (scripts/)
+
+| Script | Purpose |
+|--------|---------|
+| `eval.mk` | Makefile include: target generation, _setup-shared, _cleanup-shared |
+| `setup-venv.sh` | Create venv with lightspeed-eval (idempotent) |
+| `setup-ols.sh` | Install OLS operator + OLSConfig (idempotent) |
+| `setup-mcp.sh` | Deploy MCP server with configurable toolsets |
+| `connect-ols-mcp.sh` | Register MCP in OLSConfig + restart + wait |
+| `run-evals.sh` | Port-forward + lightspeed-eval + cleanup |
+
+### Root Makefile
+
+The root Makefile has maintenance targets only:
+
+```bash
+make cleanup        # Remove OLS operator + local venv
+```
+
+## Architecture: generic/01-payments-api-failure (Database Connection Exhaustion)
 
 Two OpenShift namespaces share a PostgreSQL database with `max_connections=20`:
 
@@ -54,14 +87,14 @@ Monitoring is wired via Prometheus ServiceMonitors and PrometheusRules with aler
 
 ### Key Paths
 
-- `01-payments-api-failure/README.md` -- scenario overview and components
-- `01-payments-api-failure/manifests/payments/` -- Kubernetes manifests for the payments namespace
-- `01-payments-api-failure/manifests/shared-services/` -- Kubernetes manifests for the shared-services namespace
-- `01-payments-api-failure/scripts/` -- shell scripts that implement each Make target
-- `01-payments-api-failure/reporting-service/v1.0.1/` -- healthy version
-- `01-payments-api-failure/reporting-service/v1.0.2/` -- buggy version (connection leak + division by zero)
+- `generic/01-payments-api-failure/README.md` -- scenario overview and components
+- `generic/01-payments-api-failure/manifests/payments/` -- Kubernetes manifests for the payments namespace
+- `generic/01-payments-api-failure/manifests/shared-services/` -- Kubernetes manifests for the shared-services namespace
+- `generic/01-payments-api-failure/scripts/` -- shell scripts that implement each Make target
+- `generic/01-payments-api-failure/reporting-service/v1.0.1/` -- healthy version
+- `generic/01-payments-api-failure/reporting-service/v1.0.2/` -- buggy version (connection leak + division by zero)
 
-## Architecture: 02-alert-storm (Cascading Alert Storm)
+## Architecture: generic/02-alert-storm (Cascading Alert Storm)
 
 Single `payments` namespace with five microservices:
 
@@ -74,15 +107,16 @@ Monitoring is wired via Prometheus ServiceMonitors and PrometheusRules with aler
 
 ### Key Paths
 
-- `02-alert-storm/README.md` -- scenario overview and components
-- `02-alert-storm/manifests/` -- Kubernetes manifests (namespace, deployments, ServiceMonitors, PrometheusRules)
-- `02-alert-storm/manifests/configmaps/` -- healthy and broken ConfigMap variants
-- `02-alert-storm/scripts/` -- shell scripts that implement each Make target
-- `02-alert-storm/images/` -- Dockerfiles and Python source for all five services
+- `generic/02-alert-storm/README.md` -- scenario overview and components
+- `generic/02-alert-storm/manifests/` -- Kubernetes manifests (namespace, deployments, ServiceMonitors, PrometheusRules)
+- `generic/02-alert-storm/manifests/configmaps/` -- healthy and broken ConfigMap variants
+- `generic/02-alert-storm/scripts/` -- shell scripts that implement each Make target
+- `generic/02-alert-storm/images/` -- Dockerfiles and Python source for all five services
 
 ## Tech Stack
 
-- **Applications**: Python 3.12, FastAPI (all services), raw psycopg2 (01 reporting-service)
-- **Infrastructure**: OpenShift 4.x, PostgreSQL 16, Prometheus user workload monitoring
-- **Container images**: Built with Dockerfile, hosted on Quay.io
-- **Deployment**: Raw Kubernetes YAML manifests applied via `oc apply`, no Helm/Kustomize
+- **Eval framework**: [lightspeed-evaluation](https://github.com/lightspeed-core/lightspeed-evaluation), Python 3.11–3.13
+- **System under test**: [OpenShift Lightspeed](https://github.com/openshift/lightspeed-service) with MCP server
+- **Applications** (generic scenarios): Python 3.12, FastAPI, raw psycopg2
+- **Infrastructure**: OpenShift 4.x, Prometheus user workload monitoring
+- **Deployment**: Raw Kubernetes YAML manifests via `oc apply`, no Helm/Kustomize

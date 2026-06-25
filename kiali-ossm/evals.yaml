@@ -101,9 +101,9 @@
 
 # ── fix_bookinfo_fault_injection ──────────────────────────────────────────────
 - conversation_group_id: fix_bookinfo_fault_injection
-  tag: fault_injection_bookinfo
-  description: 'Multi-turn: a 100% fault injection on ratings causes 503 errors.
-    Agent investigates, identifies root cause, and fixes it.'
+  tag: fix_bookinfo_fault_injection
+  description: "Multi-turn: a 100% fault injection on ratings causes 503 errors. Agent investigates, identifies root cause, and fixes it."
+
   turns:
     - turn_id: investigate_and_fix
       query: >
@@ -164,9 +164,9 @@
 
 # ── check_latency_bookinfo_issue ──────────────────────────────────────────────
 - conversation_group_id: check_latency_bookinfo_issue
-  tag: latency_bookinfo_issue
-  description: Users are reporting that the Bookinfo productpage is occasionally
-    taking 5+ seconds to load, but it doesn't happen on every request.
+  tag: check_latency_bookinfo_issue
+  description: "Users are reporting that the Bookinfo productpage is occasionally taking 5+ seconds to load, but it doesn't happen on every request."
+
   turns:
     - turn_id: diagnose
       query: >
@@ -224,8 +224,9 @@
 # ---------------------------------------------------------------
 # ── check_mesh_status_no_kiali ──────────────────────────────────────────────
 - conversation_group_id: check_mesh_status_no_kiali
-  tag: no_kiali
-  description: Check the status of the mesh and identify any issues.
+  tag: check_mesh_status_no_kiali
+  description: "Check the status of the mesh and identify any issues."
+
   turns:
     - turn_id: diagnose
       query: >

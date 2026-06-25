@@ -1,0 +1,7 @@
+# Kubernetes manifests deployed before this scenario runs.
+# Example:
+#
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: my-eval-ns
