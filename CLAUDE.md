@@ -85,6 +85,8 @@ The fault: `reporting-service` v1.0.2 accumulates database connections without c
 
 Monitoring is wired via Prometheus ServiceMonitors and PrometheusRules with alerts on error rate (`PaymentErrorRateHigh`) and connection count (`PostgresqlConnectionsHigh`, `PostgresqlTooManyConnections`).
 
+**Single-namespace mode**: `make deploy SINGLE_NAMESPACE=1` deploys everything into the `payments` namespace. The deploy script transforms manifests on the fly (retargets namespace, rewrites PGHOST to same-namespace service name, fixes PromQL expressions). Operational scripts (break, fix, cleanup, etc.) auto-detect the deployment mode by checking whether the `shared-services` namespace exists.
+
 ### Key Paths
 
 - `generic/01-payments-api-failure/README.md` -- scenario overview and components

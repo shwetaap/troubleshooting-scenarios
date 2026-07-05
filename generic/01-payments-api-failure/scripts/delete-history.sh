@@ -28,15 +28,25 @@ echo "Restarting Prometheus pods..."
 oc delete pod -n "$USER_NS" prometheus-user-workload-0 prometheus-user-workload-1
 oc delete pod -n "$PLATFORM_NS" prometheus-k8s-0 prometheus-k8s-1
 
+if oc get namespace shared-services &>/dev/null; then
+  SERVICES_NS="shared-services"
+else
+  SERVICES_NS="payments"
+fi
+
 echo ""
 echo "=== Deleting events ==="
 oc delete events --all -n payments
-oc delete events --all -n shared-services
+if [ "$SERVICES_NS" != "payments" ]; then
+  oc delete events --all -n "$SERVICES_NS"
+fi
 
 echo ""
 echo "=== Restarting demo pods ==="
 oc delete pods --all -n payments
-oc delete pods --all -n shared-services
+if [ "$SERVICES_NS" != "payments" ]; then
+  oc delete pods --all -n "$SERVICES_NS"
+fi
 
 echo ""
 echo "Done. All Prometheus and demo pods are restarting."

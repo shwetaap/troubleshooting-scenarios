@@ -7,11 +7,15 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$SCRIPT_DIR"
 
-if [ "${SINGLE_USER:-}" = "1" ]; then
+if [ "${SINGLE_USER:-}" = "1" ] || [ "${SINGLE_NAMESPACE:-}" = "1" ]; then
   MANIFESTS=$(mktemp -d)
   trap 'rm -rf $MANIFESTS' EXIT
   cp -r manifests/* "$MANIFESTS/"
+else
+  MANIFESTS="manifests"
+fi
 
+if [ "${SINGLE_USER:-}" = "1" ]; then
   # Both services use a single "dbuser" account
   sed -i 's/PGUSER: reporting/PGUSER: dbuser/' "$MANIFESTS/shared-services/01-secrets.yaml"
   sed -i 's/PGPASSWORD: reporting123/PGPASSWORD: dbuser123/' "$MANIFESTS/shared-services/01-secrets.yaml"
@@ -25,8 +29,20 @@ if [ "${SINGLE_USER:-}" = "1" ]; then
     "$MANIFESTS/shared-services/02-postgres.yaml"
 
   echo "=== Single-user mode: all services will use 'dbuser' ==="
-else
-  MANIFESTS="manifests"
+fi
+
+if [ "${SINGLE_NAMESPACE:-}" = "1" ]; then
+  rm -f "$MANIFESTS/shared-services/00-namespace.yaml"
+
+  sed -i 's/namespace: shared-services/namespace: payments/g' "$MANIFESTS/shared-services/"*.yaml
+
+  sed -i 's/namespace="shared-services"/namespace="payments"/g' "$MANIFESTS/shared-services/05-prometheusrules.yaml"
+
+  sed -i "/^  labels:$/a\\    openshift.io/user-monitoring: 'true'" "$MANIFESTS/payments/00-namespace.yaml"
+
+  sed -i 's/postgres\.shared-services\.svc\.cluster\.local/postgres/' "$MANIFESTS/payments/02-payments-api.yaml"
+
+  echo "=== Single-namespace mode: all services deploy to 'payments' ==="
 fi
 
 echo "=== Enabling user workload monitoring ==="
@@ -46,16 +62,27 @@ echo "=== Cleaning up existing namespaces ==="
 oc delete namespace shared-services --ignore-not-found --wait
 oc delete namespace payments --ignore-not-found --wait
 
-echo ""
-echo "=== Deploying shared-services ==="
-oc apply -f "$MANIFESTS/shared-services/"
-oc -n shared-services wait --for=condition=available deployment/postgres --timeout=120s
-oc -n shared-services wait --for=condition=available deployment/reporting-service --timeout=120s
+if [ "${SINGLE_NAMESPACE:-}" = "1" ]; then
+  echo ""
+  echo "=== Deploying to payments namespace ==="
+  oc apply -f "$MANIFESTS/payments/00-namespace.yaml"
+  oc apply -f "$MANIFESTS/shared-services/"
+  oc -n payments wait --for=condition=available deployment/postgres --timeout=120s
+  oc -n payments wait --for=condition=available deployment/reporting-service --timeout=120s
+  oc apply -f "$MANIFESTS/payments/"
+  oc -n payments wait --for=condition=available deployment/payments-api --timeout=120s
+else
+  echo ""
+  echo "=== Deploying shared-services ==="
+  oc apply -f "$MANIFESTS/shared-services/"
+  oc -n shared-services wait --for=condition=available deployment/postgres --timeout=120s
+  oc -n shared-services wait --for=condition=available deployment/reporting-service --timeout=120s
 
-echo ""
-echo "=== Deploying payments ==="
-oc apply -f "$MANIFESTS/payments/"
-oc -n payments wait --for=condition=available deployment/payments-api --timeout=120s
+  echo ""
+  echo "=== Deploying payments ==="
+  oc apply -f "$MANIFESTS/payments/"
+  oc -n payments wait --for=condition=available deployment/payments-api --timeout=120s
+fi
 
 ROUTE=$(oc -n payments get route payments-api -o jsonpath='{.spec.host}')
 echo ""
