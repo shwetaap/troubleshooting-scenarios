@@ -1,8 +1,14 @@
 #!/bin/bash
 set -e
 
+if oc get namespace shared-services &>/dev/null; then
+  SERVICES_NS="shared-services"
+else
+  SERVICES_NS="payments"
+fi
+
 echo "=== Applying payments-np-policy NetworkPolicy in payments namespace ==="
-oc apply -f - <<'EOF'
+oc apply -f - <<EOF
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -18,7 +24,7 @@ spec:
     - to:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: shared-services
+              kubernetes.io/metadata.name: ${SERVICES_NS}
       ports:
         - protocol: TCP
           port: 5432

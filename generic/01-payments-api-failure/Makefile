@@ -15,15 +15,19 @@ help:
 	@echo "  fix-redherring    Fix red herring"
 	@echo "  break-network     Block egress from payments-api via NetworkPolicy"
 	@echo "  fix-network       Remove the deny-all-egress NetworkPolicy"
+	@echo ""
+	@echo "Options:"
+	@echo "  SINGLE_NAMESPACE=1  Deploy everything into the payments namespace"
+	@echo "                      (only needed for deploy/deploy-easy; other targets auto-detect)"
 
 update-images:
 	@./scripts/update-images.sh $(REGISTRY)
 
 deploy:
-	@SINGLE_USER=1 ./scripts/deploy.sh
+	@SINGLE_USER=1 SINGLE_NAMESPACE=$(SINGLE_NAMESPACE) ./scripts/deploy.sh
 
 deploy-easy:
-	@./scripts/deploy.sh
+	@SINGLE_NAMESPACE=$(SINGLE_NAMESPACE) ./scripts/deploy.sh
 
 break:
 	@./scripts/break.sh

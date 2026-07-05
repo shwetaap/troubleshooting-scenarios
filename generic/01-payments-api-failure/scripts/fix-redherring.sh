@@ -3,13 +3,20 @@ set -e
 
 echo "Scenario 01 — Payments API Failure"
 echo ""
+
+if oc get namespace shared-services &>/dev/null; then
+  SERVICES_NS="shared-services"
+else
+  SERVICES_NS="payments"
+fi
+
 echo "=== Fixing probes on reconciliation-service ==="
-oc set probe deployment/reconciliation-service -n shared-services \
+oc set probe deployment/reconciliation-service -n "$SERVICES_NS" \
   --readiness --open-tcp=8080 --initial-delay-seconds=3 --period-seconds=5 --failure-threshold=3
-oc set probe deployment/reconciliation-service -n shared-services \
+oc set probe deployment/reconciliation-service -n "$SERVICES_NS" \
   --liveness --open-tcp=8080 --initial-delay-seconds=3 --period-seconds=5 --failure-threshold=3
 
-oc -n shared-services rollout status deployment/reconciliation-service --timeout=120s
+oc -n "$SERVICES_NS" rollout status deployment/reconciliation-service --timeout=120s
 
 echo ""
 echo "Done. reconciliation-service is running normally."
