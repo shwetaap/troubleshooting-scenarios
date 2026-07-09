@@ -1,0 +1,139 @@
+- conversation_group_id: api_failure_analysis_openai
+  description: gpt-5.2
+  tag: agentic_api_failure
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Alert: PaymentErrorRateHigh (critical)
+          Namespace: payments
+          Description: Payment error rate is 100.00%, which exceeds the 15% threshold.
+          Labels:
+            alertname: PaymentErrorRateHigh
+            namespace: payments
+            severity: critical
+
+          Investigate, follow causality chains to the root cause
+        targetNamespaces:
+          - payments
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: shared-services/reporting-service is repeatedly opening
+        DB connections and leaving them idle in transaction (division by zero
+        without rollback/close), exhausting PostgreSQL connection slots.
+        payments/payments-api cannot obtain a DB connection and returns 503,
+        triggering the alert storm. reconciliation-service CrashLooping is a
+        separate issue (probe port mismatch 8443 vs 8080), not related to
+        the DB connection exhaustion. Fix: restart or scale down
+        reporting-service.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: api_failure_analysis_opus
+  description: Opus 4.6
+  tag: agentic_api_failure
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Alert: PaymentErrorRateHigh (critical)
+          Namespace: payments
+          Description: Payment error rate is 100.00%, which exceeds the 15% threshold.
+          Labels:
+            alertname: PaymentErrorRateHigh
+            namespace: payments
+            severity: critical
+
+          Investigate, follow causality chains to the root cause
+        targetNamespaces:
+          - payments
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: shared-services/reporting-service is repeatedly opening
+        DB connections and leaving them idle in transaction (division by zero
+        without rollback/close), exhausting PostgreSQL connection slots.
+        payments/payments-api cannot obtain a DB connection and returns 503,
+        triggering the alert storm. reconciliation-service CrashLooping is a
+        separate issue (probe port mismatch 8443 vs 8080), not related to
+        the DB connection exhaustion. Fix: restart or scale down
+        reporting-service.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: api_failure_analysis_gemini
+  description: Gemini Flash 2.5
+  tag: agentic_api_failure
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Alert: PaymentErrorRateHigh (critical)
+          Namespace: payments
+          Description: Payment error rate is 100.00%, which exceeds the 15% threshold.
+          Labels:
+            alertname: PaymentErrorRateHigh
+            namespace: payments
+            severity: critical
+
+          Investigate, follow causality chains to the root cause
+        targetNamespaces:
+          - payments
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: shared-services/reporting-service is repeatedly opening
+        DB connections and leaving them idle in transaction (division by zero
+        without rollback/close), exhausting PostgreSQL connection slots.
+        payments/payments-api cannot obtain a DB connection and returns 503,
+        triggering the alert storm. reconciliation-service CrashLooping is a
+        separate issue (probe port mismatch 8443 vs 8080), not related to
+        the DB connection exhaustion. Fix: restart or scale down
+        reporting-service.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
