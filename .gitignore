@@ -3,3 +3,9 @@
 **/_output/
 **/.caches/
 venv/
+
+# Secrets / credentials — never commit API keys
+.env
+*.env
+credentials.yaml
+secrets/

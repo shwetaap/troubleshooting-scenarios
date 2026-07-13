@@ -1,6 +1,6 @@
 ##@ Linting
 
-LINT_DIRS ?= generic kiali-ossm netobserv
+LINT_DIRS ?= generic kiali-ossm kubevirt netobserv
 
 .PHONY: lint lint-shell lint-yaml
 
@@ -43,6 +43,7 @@ help: ## Show available targets
 	@echo ""
 	@echo "  Per-team workflow (run from team directory):"
 	@echo "    cd kiali-ossm && make setup && make evals && make cleanup"
+	@echo "    cd kubevirt   && make setup && make evals && make cleanup"
 	@echo "    cd netobserv  && make setup && make evals && make cleanup"
 	@echo ""
 

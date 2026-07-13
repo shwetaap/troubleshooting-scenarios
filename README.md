@@ -10,6 +10,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) to add a new eval suite.
 |-------|-------------|
 | [kiali-ossm/](kiali-ossm/) | Service-mesh troubleshooting using Kiali/OSSM MCP tools |
 | [netobserv/](netobserv/) | Network observability using the NetObserv MCP toolset |
+| [kubevirt/](kubevirt/) | OpenShift Virtualization troubleshooting using the KubeVirt MCP toolset |
 | [generic/](generic/) | Standalone fault-injection scenarios (not using the eval framework) |
 
 ## Requirements
