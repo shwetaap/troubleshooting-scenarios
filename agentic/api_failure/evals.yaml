@@ -1,5 +1,4 @@
 - conversation_group_id: api_failure_analysis_openai
-  description: gpt-5.2
   tag: agentic_api_failure
 
   turns:
@@ -48,8 +47,7 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: api_failure_analysis_opus
-  description: Opus 4.6
+- conversation_group_id: api_failure_analysis_anthropic
   tag: agentic_api_failure
 
   turns:
@@ -67,6 +65,11 @@
           Investigate, follow causality chains to the root cause
         targetNamespaces:
           - payments
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
         analysis:
           agent: opus
 
@@ -94,7 +97,6 @@
           threshold: 0.75
 
 - conversation_group_id: api_failure_analysis_gemini
-  description: Gemini Flash 2.5
   tag: agentic_api_failure
 
   turns:
@@ -112,6 +114,11 @@
           Investigate, follow causality chains to the root cause
         targetNamespaces:
           - payments
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot          
         analysis:
           agent: gemini
 
