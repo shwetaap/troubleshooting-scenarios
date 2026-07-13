@@ -23,7 +23,7 @@ agents:
       timeout: 600
   eval_agent:
     type: proposal
-    namespace: lightspeed-evaluation-test
+    namespace: openshift-lightspeed
     auto_approve: true
     cleanup_proposals: false
     timeout: 600

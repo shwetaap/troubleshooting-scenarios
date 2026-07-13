@@ -1,7 +1,9 @@
-- conversation_group_id: wrong_networkpolicy_openai
+- conversation_group_id: networkpolicy_openai
   description: gpt-5.2
-  tag: agentic_wrong_networkpolicy
-
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+  
   turns:
     - turn_id: turn_1
       proposal_spec:
@@ -43,9 +45,11 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: wrong_networkpolicy_opus
+- conversation_group_id: networkpolicy_opus
   description: Opus 4.6
-  tag: agentic_wrong_networkpolicy
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
 
   turns:
     - turn_id: turn_1
@@ -83,9 +87,11 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: wrong_networkpolicy_gemini
+- conversation_group_id: networkpolicy_gemini
   description: Gemini Flash 2.5
-  tag: agentic_wrong_networkpolicy
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
 
   turns:
     - turn_id: turn_1
