@@ -1,0 +1,75 @@
+---
+# KubeVirt troubleshooting evaluation scenarios.
+# tag: must match the name listed in SCENARIOS in the Makefile.
+
+- conversation_group_id: vm_storage_failure
+  tag: vm_storage_failure
+  description: >
+    VM stuck in Provisioning due to a non-existent StorageClass.
+    The AI should identify the missing StorageClass and recommend
+    removing it or replacing with a valid one.
+
+  turns:
+    - turn_id: diagnose
+      query: >
+        VM production-db-vm in namespace kubevirt-scenarios is not starting.
+        It has been stuck in Provisioning for over 10 minutes. Can you help?
+      expected_response: >
+        The agent should use the kubevirt MCP tools to inspect the VM and
+        identify that the DataVolume references a non-existent StorageClass
+        named 'premium-nvme-storage'. It should recommend switching to a
+        valid StorageClass or removing storageClassName to use the default.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./vm_storage_failure/setup.sh
+  cleanup_script: ./vm_storage_failure/cleanup.sh
+
+- conversation_group_id: vm_crashloop
+  tag: vm_crashloop
+  description: >
+    VM repeatedly starts and shuts down due to a malicious cloud-init
+    runcmd that calls 'shutdown -h now'. The AI should inspect cloud-init
+    config and identify the offending command.
+
+  turns:
+    - turn_id: diagnose
+      query: >
+        VM web-server-vm in namespace kubevirt-scenarios keeps restarting.
+        It starts but dies within 30-60 seconds. Events show repeated
+        Started/Stopped cycles. Why is this happening?
+      expected_response: >
+        The agent should use the kubevirt MCP tools to inspect the VM spec
+        and identify that the cloud-init userData contains a runcmd entry
+        with 'shutdown -h now'. It should recommend removing or fixing the
+        offending cloud-init command.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./vm_crashloop/setup.sh
+  cleanup_script: ./vm_crashloop/cleanup.sh
+
+- conversation_group_id: vm_migration_failure
+  tag: vm_migration_failure
+  description: >
+    Live migration fails because the VM has a nodeSelector pinning it
+    to a single node. The AI should identify the scheduling constraint
+    preventing migration.
+
+  turns:
+    - turn_id: diagnose
+      query: >
+        I tried to live migrate VM critical-app-vm in namespace
+        kubevirt-scenarios but the migration failed. The VM is running
+        fine otherwise. What went wrong?
+      expected_response: >
+        The agent should use the kubevirt MCP tools to inspect the VM and
+        identify the nodeSelector constraint pinning it to a specific node.
+        It should explain that live migration requires at least one other
+        schedulable node that matches the selector, and recommend removing
+        the nodeSelector or adding more matching nodes.
+      turn_metrics:
+        - custom:answer_correctness
+
+  setup_script: ./vm_migration_failure/setup.sh
+  cleanup_script: ./vm_migration_failure/cleanup.sh
