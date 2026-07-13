@@ -1,5 +1,4 @@
 - conversation_group_id: networkpolicy_openai
-  description: gpt-5.2
   tag: agentic_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
@@ -45,8 +44,7 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: networkpolicy_opus
-  description: Opus 4.6
+- conversation_group_id: networkpolicy_anthropic
   tag: agentic_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
@@ -63,6 +61,11 @@
           follow causality chains to the root cause.
         targetNamespaces:
           - service-mesh
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
         analysis:
           agent: opus
 
@@ -88,7 +91,6 @@
           threshold: 0.75
 
 - conversation_group_id: networkpolicy_gemini
-  description: Gemini Flash 2.5
   tag: agentic_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
@@ -105,6 +107,11 @@
           follow causality chains to the root cause.
         targetNamespaces:
           - service-mesh
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
         analysis:
           agent: gemini
 

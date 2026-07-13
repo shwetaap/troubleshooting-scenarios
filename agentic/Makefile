@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES := api-failure networkpolicy
+SUITES := api_failure networkpolicy
 RUNS ?= 1
 
 .PHONY: setup evals
@@ -9,7 +9,7 @@ setup:
 	$(SCRIPTS_DIR)/setup-venv.sh
 
 evals:
-	$(eval RESULTS_DIR := results_$(shell date +%Y%m%d_%H%M%S))
+	$(eval RESULTS_DIR := results/$(shell date +%Y%m%d_%H%M%S))
 	@for suite in $(SUITES); do \
 	  echo "==> Suite: $$suite"; \
 	  bash $(SCRIPTS_DIR)/run-agentic-evals.sh \
