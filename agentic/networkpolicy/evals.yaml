@@ -1,0 +1,130 @@
+- conversation_group_id: networkpolicy_openai
+  description: gpt-5.2
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+  
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The frontend application in the service-mesh namespace is logging
+          repeated "ERROR: Connection timeout to backend-service!" messages.
+          The backend pod appears to be running and healthy.
+
+          Investigate the connectivity issue between frontend and backend,
+          follow causality chains to the root cause.
+        targetNamespaces:
+          - service-mesh
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the backend-network-policy NetworkPolicy only allows
+        ingress to backend pods from pods with label tier=backend, but the
+        frontend pod has label tier=frontend. This causes all traffic from
+        frontend to backend-service on port 8080 to be blocked. Fix: update
+        the NetworkPolicy ingress rule to allow pods with tier=frontend
+        (or app=frontend), or relabel the frontend pod to tier=backend.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: networkpolicy_opus
+  description: Opus 4.6
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The frontend application in the service-mesh namespace is logging
+          repeated "ERROR: Connection timeout to backend-service!" messages.
+          The backend pod appears to be running and healthy.
+
+          Investigate the connectivity issue between frontend and backend,
+          follow causality chains to the root cause.
+        targetNamespaces:
+          - service-mesh
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the backend-network-policy NetworkPolicy only allows
+        ingress to backend pods from pods with label tier=backend, but the
+        frontend pod has label tier=frontend. This causes all traffic from
+        frontend to backend-service on port 8080 to be blocked. Fix: update
+        the NetworkPolicy ingress rule to allow pods with tier=frontend
+        (or app=frontend), or relabel the frontend pod to tier=backend.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: networkpolicy_gemini
+  description: Gemini Flash 2.5
+  tag: agentic_networkpolicy
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The frontend application in the service-mesh namespace is logging
+          repeated "ERROR: Connection timeout to backend-service!" messages.
+          The backend pod appears to be running and healthy.
+
+          Investigate the connectivity issue between frontend and backend,
+          follow causality chains to the root cause.
+        targetNamespaces:
+          - service-mesh
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the backend-network-policy NetworkPolicy only allows
+        ingress to backend pods from pods with label tier=backend, but the
+        frontend pod has label tier=frontend. This causes all traffic from
+        frontend to backend-service on port 8080 to be blocked. Fix: update
+        the NetworkPolicy ingress rule to allow pods with tier=frontend
+        (or app=frontend), or relabel the frontend pod to tier=backend.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
