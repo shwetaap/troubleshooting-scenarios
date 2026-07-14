@@ -1,0 +1,38 @@
+logging:
+  source_level: DEBUG
+
+core:
+  max_threads: 1
+  fail_on_invalid_data: true
+  skip_on_failure: false
+
+llm_pool:
+    models:
+      gpt-4.1:
+        provider: openai
+
+judge_panel:
+    judges:
+      - gpt-4.1
+
+agents:
+  enabled: true
+  default:
+    agent: eval_agent
+    agent_config:
+      timeout: 600
+  eval_agent:
+    type: proposal
+    namespace: openshift-lightspeed
+    auto_approve: true
+    cleanup_proposals: false
+    timeout: 600
+    poll_interval: 5
+
+storage:
+  - type: file
+    output_dir: ./eval_output
+    enabled_outputs: [csv, json]
+
+environment:
+  LITELLM_LOG: ERROR

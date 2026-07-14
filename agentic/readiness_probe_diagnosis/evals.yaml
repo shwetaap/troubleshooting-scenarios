@@ -1,0 +1,143 @@
+- conversation_group_id: readiness_probe_diagnosis_openai
+  tag: agentic_readiness_probe_diagnosis
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The catalog-index-service in the discovery-hub namespace appears to
+          be running but is not becoming Ready. The pod name resembles a
+          Kubernetes Service, but it is actually a Pod.
+
+          Investigate why catalog-index-service is not ready, identify the
+          root cause, and propose a fix.
+        targetNamespaces:
+          - discovery-hub
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the catalog-index-service pod is not ready because its
+        readiness probe is failing. The pod runs a busybox container with a
+        simple echo/sleep loop but has an HTTP readiness probe configured to
+        GET /healthz on port 9200. Since the container does not run an HTTP
+        server, nothing listens on port 9200, and the probe always fails
+        with connection refused. Fix: either add an HTTP server that responds
+        on port 9200, change the probe to an exec-based probe that matches
+        what the container actually runs, or remove the readiness probe.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: readiness_probe_diagnosis_anthropic
+  tag: agentic_readiness_probe_diagnosis
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The catalog-index-service in the discovery-hub namespace appears to
+          be running but is not becoming Ready. The pod name resembles a
+          Kubernetes Service, but it is actually a Pod.
+
+          Investigate why catalog-index-service is not ready, identify the
+          root cause, and propose a fix.
+        targetNamespaces:
+          - discovery-hub
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the catalog-index-service pod is not ready because its
+        readiness probe is failing. The pod runs a busybox container with a
+        simple echo/sleep loop but has an HTTP readiness probe configured to
+        GET /healthz on port 9200. Since the container does not run an HTTP
+        server, nothing listens on port 9200, and the probe always fails
+        with connection refused. Fix: either add an HTTP server that responds
+        on port 9200, change the probe to an exec-based probe that matches
+        what the container actually runs, or remove the readiness probe.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: readiness_probe_diagnosis_gemini
+  tag: agentic_readiness_probe_diagnosis
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The catalog-index-service in the discovery-hub namespace appears to
+          be running but is not becoming Ready. The pod name resembles a
+          Kubernetes Service, but it is actually a Pod.
+
+          Investigate why catalog-index-service is not ready, identify the
+          root cause, and propose a fix.
+        targetNamespaces:
+          - discovery-hub
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the catalog-index-service pod is not ready because its
+        readiness probe is failing. The pod runs a busybox container with a
+        simple echo/sleep loop but has an HTTP readiness probe configured to
+        GET /healthz on port 9200. Since the container does not run an HTTP
+        server, nothing listens on port 9200, and the probe always fails
+        with connection refused. Fix: either add an HTTP server that responds
+        on port 9200, change the probe to an exec-based probe that matches
+        what the container actually runs, or remove the readiness probe.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
