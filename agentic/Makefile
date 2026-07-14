@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES ?= failing_api mismatched_ingress_rule misconfigured_readiness_probe missing_envvar scheduled_outage blocking_networkpolicy
+SUITES ?= blocking_networkpolicy failing_api misconfigured_readiness_probe mismatched_ingress_rule missing_envvar scheduled_outage pending_pvc
 RUNS ?= 1
 
 .PHONY: setup evals cleanup help
