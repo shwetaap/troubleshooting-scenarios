@@ -1,0 +1,134 @@
+- conversation_group_id: envvar_missing_analysis_openai
+  tag: agentic_envvar_missing
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: order-fulfillment-daemon
+          Namespace: warehouse-ops
+          Status: CrashLoopBackOff
+          Description: The order-fulfillment-daemon pod is repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - warehouse-ops
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The order-fulfillment-daemon pod is crashing because the
+        required environment variable DEPLOY_ENV is undefined or missing in the
+        deployment configuration. The container checks for this variable at
+        startup and exits with an error when it's not set. Fix: Add the
+        DEPLOY_ENV environment variable to the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: envvar_missing_analysis_anthropic
+  tag: agentic_envvar_missing
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: order-fulfillment-daemon
+          Namespace: warehouse-ops
+          Status: CrashLoopBackOff
+          Description: The order-fulfillment-daemon pod is repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - warehouse-ops
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The order-fulfillment-daemon pod is crashing because the
+        required environment variable DEPLOY_ENV is undefined or missing in the
+        deployment configuration. The container checks for this variable at
+        startup and exits with an error when it's not set. Fix: Add the
+        DEPLOY_ENV environment variable to the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: envvar_missing_analysis_gemini
+  tag: agentic_envvar_missing
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: order-fulfillment-daemon
+          Namespace: warehouse-ops
+          Status: CrashLoopBackOff
+          Description: The order-fulfillment-daemon pod is repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - warehouse-ops
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The order-fulfillment-daemon pod is crashing because the
+        required environment variable DEPLOY_ENV is undefined or missing in the
+        deployment configuration. The container checks for this variable at
+        startup and exits with an error when it's not set. Fix: Add the
+        DEPLOY_ENV environment variable to the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
