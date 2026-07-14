@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES ?= api_failure networkpolicy readiness_probe_diagnosis
+SUITES ?= api_failure networkpolicy scheduled_outage_detection
 RUNS ?= 1
 
 .PHONY: setup evals
