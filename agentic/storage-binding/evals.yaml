@@ -1,0 +1,140 @@
+- conversation_group_id: storage_binding_analysis_openai
+  tag: agentic_storage_binding
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          PVC: memcached-data-pvc
+          Namespace: cache-tier
+          Status: Pending
+          Description: The memcached-data-pvc PersistentVolumeClaim is stuck in
+          Pending state and the memcached deployment pods cannot start.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - cache-tier
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The memcached-data-pvc PersistentVolumeClaim is stuck in
+        Pending state because it references a StorageClass named "standard-v2"
+        that does not exist in the cluster. The PVC cannot be provisioned
+        without a valid StorageClass. Fix: Update the PVC storageClassName to
+        an available StorageClass in the cluster (e.g. gp2, gp3-csi) or
+        create the missing "standard-v2" StorageClass.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: storage_binding_analysis_anthropic
+  tag: agentic_storage_binding
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          PVC: memcached-data-pvc
+          Namespace: cache-tier
+          Status: Pending
+          Description: The memcached-data-pvc PersistentVolumeClaim is stuck in
+          Pending state and the memcached deployment pods cannot start.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - cache-tier
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The memcached-data-pvc PersistentVolumeClaim is stuck in
+        Pending state because it references a StorageClass named "standard-v2"
+        that does not exist in the cluster. The PVC cannot be provisioned
+        without a valid StorageClass. Fix: Update the PVC storageClassName to
+        an available StorageClass in the cluster (e.g. gp2, gp3-csi) or
+        create the missing "standard-v2" StorageClass.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: storage_binding_analysis_gemini
+  tag: agentic_storage_binding
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          PVC: memcached-data-pvc
+          Namespace: cache-tier
+          Status: Pending
+          Description: The memcached-data-pvc PersistentVolumeClaim is stuck in
+          Pending state and the memcached deployment pods cannot start.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - cache-tier
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The memcached-data-pvc PersistentVolumeClaim is stuck in
+        Pending state because it references a StorageClass named "standard-v2"
+        that does not exist in the cluster. The PVC cannot be provisioned
+        without a valid StorageClass. Fix: Update the PVC storageClassName to
+        an available StorageClass in the cluster (e.g. gp2, gp3-csi) or
+        create the missing "standard-v2" StorageClass.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
