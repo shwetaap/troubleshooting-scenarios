@@ -5,7 +5,7 @@ FIXTURE_DIR="$(cd "$(dirname "$0")/fixtures" && pwd)"
 NS="discovery-hub"
 POD_NAME="catalog-index-service"
 
-echo "Applying readiness_probe_diagnosis scenario manifests in namespace ${NS}…"
+echo "Applying misconfigured_readiness_probe scenario manifests in namespace ${NS}…"
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
 
 echo "Waiting for readiness probe failure event (up to 60s)…"
@@ -16,7 +16,7 @@ until [ "$ATTEMPT" -ge 60 ]; do
     --field-selector "involvedObject.name=$POD_NAME,reason=Unhealthy" \
     -o jsonpath='{.items[*].message}' 2>/dev/null || true)
   if echo "$EVENTS" | grep -q "Readiness probe failed"; then
-    echo "Scenario readiness_probe_diagnosis ready — readiness probe failure event found (attempt ${ATTEMPT})"
+    echo "Scenario misconfigured_readiness_probe ready — readiness probe failure event found (attempt ${ATTEMPT})"
     exit 0
   fi
   [ $((ATTEMPT % 10)) -eq 0 ] && echo "  attempt ${ATTEMPT}/60 — waiting…"

@@ -1,5 +1,5 @@
-- conversation_group_id: readiness_probe_diagnosis_openai
-  tag: agentic_readiness_probe_diagnosis
+- conversation_group_id: misconfigured_readiness_probe_openai
+  tag: agentic_misconfigured_readiness_probe
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -46,8 +46,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: readiness_probe_diagnosis_anthropic
-  tag: agentic_readiness_probe_diagnosis
+- conversation_group_id: misconfigured_readiness_probe_anthropic
+  tag: agentic_misconfigured_readiness_probe
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -94,8 +94,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: readiness_probe_diagnosis_gemini
-  tag: agentic_readiness_probe_diagnosis
+- conversation_group_id: misconfigured_readiness_probe_gemini
+  tag: agentic_misconfigured_readiness_probe
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 

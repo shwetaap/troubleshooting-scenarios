@@ -1,5 +1,5 @@
-- conversation_group_id: ingress_rule_mismatch_openai
-  tag: agentic_ingress_rule_mismatch
+- conversation_group_id: mismatched_ingress_rule_openai
+  tag: agentic_mismatched_ingress_rule
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -46,8 +46,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: ingress_rule_mismatch_anthropic
-  tag: agentic_ingress_rule_mismatch
+- conversation_group_id: mismatched_ingress_rule_anthropic
+  tag: agentic_mismatched_ingress_rule
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -94,8 +94,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: ingress_rule_mismatch_gemini
-  tag: agentic_ingress_rule_mismatch
+- conversation_group_id: mismatched_ingress_rule_gemini
+  tag: agentic_mismatched_ingress_rule
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 

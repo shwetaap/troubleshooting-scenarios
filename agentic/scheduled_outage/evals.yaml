@@ -1,5 +1,5 @@
-- conversation_group_id: scheduled_outage_detection_openai
-  tag: agentic_scheduled_outage_detection
+- conversation_group_id: scheduled_outage_openai
+  tag: agentic_scheduled_outage
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -45,8 +45,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: scheduled_outage_detection_anthropic
-  tag: agentic_scheduled_outage_detection
+- conversation_group_id: scheduled_outage_anthropic
+  tag: agentic_scheduled_outage
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -92,8 +92,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: scheduled_outage_detection_gemini
-  tag: agentic_scheduled_outage_detection
+- conversation_group_id: scheduled_outage_gemini
+  tag: agentic_scheduled_outage
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
