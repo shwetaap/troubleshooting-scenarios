@@ -4,7 +4,7 @@ set -euo pipefail
 FIXTURE_DIR="$(cd "$(dirname "$0")/fixtures" && pwd)"
 NS="platform-core"
 
-echo "Applying ingress_rule_mismatch scenario manifests in namespace ${NS}…"
+echo "Applying mismatched_ingress_rule scenario manifests in namespace ${NS}…"
 oc apply -f "$FIXTURE_DIR/api-gateway.yaml"
 
 echo "Waiting for api-gateway deployment to be ready…"
@@ -18,7 +18,7 @@ until [ "$ATTEMPT" -ge 30 ]; do
   ATTEMPT=$((ATTEMPT + 1))
   if oc logs -l app=web-portal -n "$NS" --tail=20 2>/dev/null \
      | grep -q "ERROR: Connection timeout to api-gateway-svc!"; then
-    echo "Scenario ingress_rule_mismatch ready — timeout error detected (attempt ${ATTEMPT})"
+    echo "Scenario mismatched_ingress_rule ready — timeout error detected (attempt ${ATTEMPT})"
     exit 0
   fi
   [ $((ATTEMPT % 10)) -eq 0 ] && echo "  attempt ${ATTEMPT}/30 — waiting…"

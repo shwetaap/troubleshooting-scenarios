@@ -4,12 +4,13 @@
 import csv
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import yaml
 
 METRIC_LABELS = {
-    "custom:proposal_status": "Status",
+    "custom:proposal_status": "Completed",
     "custom:proposal_evaluation_correctness": "Correctness",
 }
 
@@ -18,17 +19,19 @@ RED = "\033[0;31m"
 RESET = "\033[0m"
 
 
-def load_json_data(json_files: list[Path]) -> tuple[list[list[dict]], dict]:
-    """Load results and configuration from JSON summary files."""
+def load_json_data(json_files: list[Path]) -> tuple[list[list[dict]], dict, str]:
+    """Load results, configuration, and timestamp from JSON summary files."""
     runs = []
     config = {}
+    timestamp = ""
     for path in sorted(json_files):
         with open(path) as f:
             data = json.load(f)
         runs.append(data.get("results", []))
         if not config:
             config = data.get("configuration", {})
-    return runs, config
+            timestamp = data.get("timestamp", "")
+    return runs, config, timestamp
 
 
 def load_csv_data(json_files: list[Path]) -> list[list[dict]]:
@@ -153,24 +156,8 @@ def generate_details(
         for run_idx, (json_results, csv_rows) in enumerate(zip(json_runs, csv_runs), 1):
             run_metrics = [r for r in json_results if r["conversation_group_id"] == cid]
 
-            lines.append(f"### Run {run_idx}")
+            lines.append(f"### AgenticRun #{run_idx}")
             lines.append("")
-
-            # Get response from CSV (same for all metrics in a turn)
-            response = None
-            for row in csv_rows:
-                if row["conversation_group_id"] == cid and row.get("response"):
-                    response = row["response"]
-                    break
-
-            if response:
-                lines.append("<details>")
-                lines.append("<summary>Response</summary>")
-                lines.append("")
-                lines.append(response.strip())
-                lines.append("")
-                lines.append("</details>")
-                lines.append("")
 
             # Metric results from JSON
             for r in run_metrics:
@@ -189,7 +176,24 @@ def generate_details(
 
                 lines.append("")
 
-        lines.append("---")
+            # Response from CSV (collapsible, after metrics)
+            response = None
+            for row in csv_rows:
+                if row["conversation_group_id"] == cid and row.get("response"):
+                    response = row["response"]
+                    break
+
+            if response:
+                lines.append("<details>")
+                lines.append("<summary>See response</summary>")
+                lines.append("")
+                lines.append("````markdown")
+                lines.append(response.strip())
+                lines.append("````")
+                lines.append("")
+                lines.append("</details>")
+                lines.append("")
+
         lines.append("")
 
     return "\n".join(lines)
@@ -204,8 +208,6 @@ def generate_judge_config(config: dict) -> str:
         "",
         f"- **Provider**: {llm.get('provider', 'N/A')}",
         f"- **Model**: {llm.get('model', 'N/A')}",
-        f"- **Temperature**: {llm.get('temperature', 'N/A')}",
-        f"- **Max tokens**: {llm.get('max_tokens', 'N/A')}",
         "",
     ]
     return "\n".join(lines)
@@ -217,6 +219,14 @@ def format_cell(value) -> str:
     return str(value)
 
 
+def format_timestamp(timestamp: str) -> str:
+    """Format an ISO 8601 timestamp for display."""
+    if not timestamp:
+        return ""
+    dt = datetime.fromisoformat(timestamp)
+    return dt.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
 def generate_markdown(
     conversations: list[str],
     columns: list[str],
@@ -226,10 +236,15 @@ def generate_markdown(
     csv_runs: list[list[dict]],
     config: dict,
     descriptions: dict[str, str],
+    timestamp: str = "",
 ) -> str:
-    header = "| Conversation | " + " | ".join(columns) + " |"
+    header = "| Test | " + " | ".join(columns) + " |"
     separator = "|---|" + "|".join("---" for _ in columns) + "|"
-    lines = [f"# Evaluation Summary ({total_runs} runs)", "", header, separator]
+    lines = ["# Evaluation Summary"]
+    formatted = format_timestamp(timestamp)
+    if formatted:
+        lines.append(formatted)
+    lines.extend(["", header, separator])
     for cid, row in zip(conversations, rows):
         cells = " | ".join(format_cell(row[c]) for c in columns)
         lines.append(f"| {cid} | {cells} |")
@@ -274,14 +289,14 @@ def print_table(
     if not rows:
         return
 
-    col_widths = [max(len("Conversation"), *(len(c) for c in conversations))]
+    col_widths = [max(len("Scenario"), *(len(c) for c in conversations))]
     for col in columns:
         values = [cell_display(row[col]) for row in rows]
         col_widths.append(max(len(col), *(len(v) for v in values)))
 
     sep = "+-" + "-+-".join("-" * w for w in col_widths) + "-+"
     header = "| " + " | ".join(
-        f"{h:<{w}}" for h, w in zip(["Conversation"] + columns, col_widths)
+        f"{h:<{w}}" for h, w in zip(["Scenario"] + columns, col_widths)
     ) + " |"
 
     print(sep)
@@ -323,7 +338,7 @@ def main():
     json_files = [Path(f) for f in sys.argv[3:]]
 
     descriptions = load_descriptions(evals_file)
-    json_runs, config = load_json_data(json_files)
+    json_runs, config, timestamp = load_json_data(json_files)
     csv_runs = load_csv_data(json_files)
     conversations, columns, rows = build_summary(json_runs)
     total_runs = len(json_runs)
@@ -332,7 +347,7 @@ def main():
     output.write_text(
         generate_markdown(
             conversations, columns, rows, total_runs, json_runs, csv_runs, config,
-            descriptions,
+            descriptions, timestamp,
         )
     )
 

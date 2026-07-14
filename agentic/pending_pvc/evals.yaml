@@ -1,5 +1,5 @@
-- conversation_group_id: storage_binding_analysis_openai
-  tag: agentic_storage_binding
+- conversation_group_id: pending_pvc_analysis_openai
+  tag: agentic_pending_pvc
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -45,8 +45,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: storage_binding_analysis_anthropic
-  tag: agentic_storage_binding
+- conversation_group_id: pending_pvc_analysis_anthropic
+  tag: agentic_pending_pvc
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -92,8 +92,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: storage_binding_analysis_gemini
-  tag: agentic_storage_binding
+- conversation_group_id: pending_pvc_analysis_gemini
+  tag: agentic_pending_pvc
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 

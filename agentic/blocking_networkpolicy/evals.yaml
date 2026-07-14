@@ -1,5 +1,5 @@
-- conversation_group_id: networkpolicy_openai
-  tag: agentic_networkpolicy
+- conversation_group_id: blocking_networkpolicy_openai
+  tag: agentic_blocking_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
   
@@ -44,8 +44,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: networkpolicy_anthropic
-  tag: agentic_networkpolicy
+- conversation_group_id: blocking_networkpolicy_anthropic
+  tag: agentic_blocking_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 
@@ -90,8 +90,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: networkpolicy_gemini
-  tag: agentic_networkpolicy
+- conversation_group_id: blocking_networkpolicy_gemini
+  tag: agentic_blocking_networkpolicy
   setup_script: ./setup.sh
   cleanup_script: ./cleanup.sh
 

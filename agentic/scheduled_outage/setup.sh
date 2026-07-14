@@ -5,7 +5,7 @@ FIXTURE_DIR="$(cd "$(dirname "$0")/fixtures" && pwd)"
 NS="analytics-platform"
 APP="report-generator"
 
-echo "Applying scheduled_outage_detection scenario manifests in namespace ${NS}…"
+echo "Applying scheduled_outage scenario manifests in namespace ${NS}…"
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
 oc create secret generic report-generator-logs-script \
   --from-file=generate_logs.py="$FIXTURE_DIR/generate_logs.py" \
@@ -31,4 +31,4 @@ until logs_ready; do
   [ $((ATTEMPT % 10)) -eq 0 ] && echo "  attempt ${ATTEMPT}/40 — waiting…"
   sleep 3
 done
-echo "Scenario scheduled_outage_detection ready — all log sentinels present (attempt ${ATTEMPT})"
+echo "Scenario scheduled_outage ready — all log sentinels present (attempt ${ATTEMPT})"
