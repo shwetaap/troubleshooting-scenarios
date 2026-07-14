@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES := api_failure networkpolicy
+SUITES := api_failure envvar-missing networkpolicy
 RUNS ?= 1
 
 .PHONY: setup evals
