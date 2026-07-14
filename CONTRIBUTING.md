@@ -2,17 +2,21 @@
 
 Each eval suite owns a top-level directory containing evaluation scenarios for a domain. This guide explains how to create one.
 
+## Naming conventions
+
+Directory names must use underscores (`_`), not hyphens (`-`). This keeps directory names consistent with scenario tags and avoids character translation at runtime.
+
 ## 1. Copy the template
 
 ```bash
-cp -r _template my-suite
-cd my-suite
+cp -r _template my_suite
+cd my_suite
 ```
 
 ## 2. Directory structure
 
 ```
-my-suite/
+my_suite/
 ├── Makefile                    # Declares scenarios, MCP config, setup/cleanup
 ├── system.yaml                 # Evaluation framework config (judge model, metrics)
 ├── evals.yaml                  # Conversation definitions (queries + expected responses)

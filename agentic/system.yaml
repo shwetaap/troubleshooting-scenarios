@@ -6,14 +6,11 @@ core:
   fail_on_invalid_data: true
   skip_on_failure: false
 
-llm_pool:
-    models:
-      gpt-4.1:
-        provider: openai
-
-judge_panel:
-    judges:
-      - gpt-4.1
+llm:
+  provider: openai
+  model: gpt-5.4-mini
+  max_tokens: 1000
+  cache_enabled: false
 
 agents:
   enabled: true
@@ -23,7 +20,7 @@ agents:
       timeout: 600
   eval_agent:
     type: proposal
-    namespace: lightspeed-evaluation-test
+    namespace: openshift-lightspeed
     auto_approve: true
     cleanup_proposals: false
     timeout: 600
