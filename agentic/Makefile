@@ -13,7 +13,9 @@ setup:
 	@echo "This will be automated in the future."
 
 evals:
-	$(eval RESULTS_DIR := results/$(shell date +%Y%m%d_%H%M%S))
+	$(eval DATETIME := $(shell date +%Y%m%d_%H%M%S))
+	$(eval LOGS_DIR := results/logs/$(DATETIME))
+	$(eval SUMMARY := results/results_$(DATETIME).md)
 	@for suite in $(SUITES); do \
 	  echo "==> Setup: $$suite"; \
 	  if [ -x $$suite/setup.sh ]; then bash $$suite/setup.sh; fi; \
@@ -21,7 +23,7 @@ evals:
 	  bash $(SCRIPTS_DIR)/run-agentic-evals.sh \
 	    --system-config system.yaml \
 	    --evals $$suite/evals.yaml \
-	    --results-dir $(RESULTS_DIR) \
+	    --results-dir $(LOGS_DIR) \
 	    --runs $(RUNS) \
 	    --tag agentic_$$(echo $$suite | tr '-' '_'); \
 	  echo "==> Cleanup: $$suite"; \
@@ -30,9 +32,10 @@ evals:
 	@echo ""
 	@echo "==> Generating summary..."
 	@../venv/bin/python $(SCRIPTS_DIR)/summarize-agentic-evals.py \
-	  $(RESULTS_DIR) \
+	  $(LOGS_DIR) \
+	  --output $(SUMMARY) \
 	  $(foreach s,$(SUITES),$s/evals.yaml) \
-	  $$(find $(RESULTS_DIR) -name '*_summary.json' | sort)
+	  $$(find $(LOGS_DIR) -name '*_summary.json' | sort)
 
 cleanup:
 	@for suite in $(SUITES); do \

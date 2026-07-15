@@ -290,7 +290,7 @@ def generate_markdown(
     descriptions: dict[str, str],
     timestamp: str = "",
 ) -> str:
-    header = "| Test | " + " | ".join(columns) + " |"
+    header = "| Scenario | " + " | ".join(columns) + " |"
     separator = "|---|" + "|".join("---" for _ in columns) + "|"
     lines = ["# Evaluation Summary"]
     formatted = format_timestamp(timestamp)
@@ -389,14 +389,22 @@ def load_descriptions(evals_files: list[Path]) -> dict[str, str]:
 
 def main():
     if len(sys.argv) < 3:
-        print(f"Usage: {sys.argv[0]} RESULTS_DIR FILE [FILE ...]")
+        print(f"Usage: {sys.argv[0]} RESULTS_DIR [--output FILE] FILE [FILE ...]")
         print("  Files ending in .yaml are treated as evals configs,")
         print("  files ending in .json as summary results.")
+        print("  --output FILE  Write summary to FILE instead of RESULTS_DIR/summary.md")
         sys.exit(1)
 
-    results_dir = Path(sys.argv[1])
-    evals_files = [Path(f) for f in sys.argv[2:] if f.endswith(".yaml")]
-    json_files = [Path(f) for f in sys.argv[2:] if f.endswith(".json")]
+    args = sys.argv[1:]
+    results_dir = Path(args.pop(0))
+
+    output_path = None
+    if args and args[0] == "--output":
+        args.pop(0)
+        output_path = Path(args.pop(0))
+
+    evals_files = [Path(f) for f in args if f.endswith(".yaml")]
+    json_files = [Path(f) for f in args if f.endswith(".json")]
 
     descriptions = load_descriptions(evals_files)
     json_runs, config, timestamp = load_json_data(json_files)
@@ -404,7 +412,7 @@ def main():
     conversations, columns, rows = build_summary(json_runs)
     total_runs = len(json_runs)
 
-    output = results_dir / "summary.md"
+    output = output_path or results_dir / "summary.md"
     output.write_text(
         generate_markdown(
             conversations, columns, rows, total_runs, json_runs, csv_runs, config,
