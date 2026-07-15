@@ -84,14 +84,15 @@ def build_summary(
                 seen_metrics.add(mid)
                 metrics.append(mid)
 
-    total = len(runs)
     rows = []
     for cid in conversations:
+        relevant = [r for r in runs if any(x["conversation_group_id"] == cid for x in r)]
+        total = len(relevant)
         row = {}
         for mid in metrics:
-            passed = sum(1 for r in runs if metric_passed(r, cid, mid))
+            passed = sum(1 for r in relevant if metric_passed(r, cid, mid))
             row[metric_label(mid)] = (passed, total)
-        overall = sum(1 for r in runs if all_passed(r, cid, metrics))
+        overall = sum(1 for r in relevant if all_passed(r, cid, metrics))
         row["Overall"] = (overall, total)
         rows.append(row)
 
@@ -105,6 +106,51 @@ def md_cell(passed: int, total: int) -> str:
     if passed == 0:
         return f"❌ {passed}/{total}"
     return f"{passed}/{total}"
+
+
+def split_model_scenario(cid: str) -> tuple[str, str]:
+    """Split 'scenario_model' into (scenario, model) using the last _ segment."""
+    parts = cid.rsplit("_", 1)
+    if len(parts) == 2:
+        return parts[0], parts[1]
+    return cid, ""
+
+
+def generate_pivot_table(
+    conversations: list[str],
+    rows: list[dict],
+) -> str:
+    """Build a model-vs-scenario pivot table with Overall results."""
+    scenarios = []
+    seen_scenarios = set()
+    models = []
+    seen_models = set()
+    pivot = {}
+
+    for cid, row in zip(conversations, rows):
+        scenario, model = split_model_scenario(cid)
+        if scenario not in seen_scenarios:
+            seen_scenarios.add(scenario)
+            scenarios.append(scenario)
+        if model not in seen_models:
+            seen_models.add(model)
+            models.append(model)
+        pivot[(model, scenario)] = row["Overall"]
+
+    if not models or not scenarios:
+        return ""
+
+    header = "| Model | " + " | ".join(scenarios) + " |"
+    separator = "|---|" + "|".join("---" for _ in scenarios) + "|"
+    lines = [header, separator]
+    for model in models:
+        cells = []
+        for scenario in scenarios:
+            value = pivot.get((model, scenario))
+            cells.append(format_cell(value) if value else "")
+        lines.append(f"| {model} | " + " | ".join(cells) + " |")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def generate_details(
@@ -153,7 +199,12 @@ def generate_details(
             lines.append("```")
             lines.append("")
 
-        for run_idx, (json_results, csv_rows) in enumerate(zip(json_runs, csv_runs), 1):
+        relevant = [
+            (json_results, csv_rows)
+            for json_results, csv_rows in zip(json_runs, csv_runs)
+            if any(r["conversation_group_id"] == cid for r in json_results)
+        ]
+        for run_idx, (json_results, csv_rows) in enumerate(relevant, 1):
             run_metrics = [r for r in json_results if r["conversation_group_id"] == cid]
 
             lines.append(f"### AgenticRun #{run_idx}")
@@ -194,6 +245,7 @@ def generate_details(
                 lines.append("</details>")
                 lines.append("")
 
+        lines.append("[Back to top](#evaluation-summary)")
         lines.append("")
 
     return "\n".join(lines)
@@ -244,10 +296,16 @@ def generate_markdown(
     formatted = format_timestamp(timestamp)
     if formatted:
         lines.append(formatted)
-    lines.extend(["", header, separator])
+
+    pivot = generate_pivot_table(conversations, rows)
+    if pivot:
+        lines.extend(["", pivot])
+
+    lines.extend(["## Details", "", header, separator])
     for cid, row in zip(conversations, rows):
+        anchor = cid.lower().replace(" ", "-")
         cells = " | ".join(format_cell(row[c]) for c in columns)
-        lines.append(f"| {cid} | {cells} |")
+        lines.append(f"| [{cid}](#{anchor}) | {cells} |")
     lines.append("")
 
     judge_config = generate_judge_config(config)
@@ -313,31 +371,34 @@ def print_table(
     print(sep)
 
 
-def load_descriptions(evals_file: Path) -> dict[str, str]:
-    """Load conversation descriptions from evals.yaml."""
-    if not evals_file.exists():
-        return {}
-    with open(evals_file) as f:
-        data = yaml.safe_load(f)
-    if not isinstance(data, list):
-        return {}
-    return {
-        entry["conversation_group_id"]: entry.get("description", "")
-        for entry in data
-        if "conversation_group_id" in entry
-    }
+def load_descriptions(evals_files: list[Path]) -> dict[str, str]:
+    """Load conversation descriptions from one or more evals YAML files."""
+    descriptions = {}
+    for evals_file in evals_files:
+        if not evals_file.exists():
+            continue
+        with open(evals_file) as f:
+            data = yaml.safe_load(f)
+        if not isinstance(data, list):
+            continue
+        for entry in data:
+            if "conversation_group_id" in entry:
+                descriptions[entry["conversation_group_id"]] = entry.get("description", "")
+    return descriptions
 
 
 def main():
-    if len(sys.argv) < 4:
-        print(f"Usage: {sys.argv[0]} RESULTS_DIR EVALS_YAML JSON_FILE [JSON_FILE ...]")
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} RESULTS_DIR FILE [FILE ...]")
+        print("  Files ending in .yaml are treated as evals configs,")
+        print("  files ending in .json as summary results.")
         sys.exit(1)
 
     results_dir = Path(sys.argv[1])
-    evals_file = Path(sys.argv[2])
-    json_files = [Path(f) for f in sys.argv[3:]]
+    evals_files = [Path(f) for f in sys.argv[2:] if f.endswith(".yaml")]
+    json_files = [Path(f) for f in sys.argv[2:] if f.endswith(".json")]
 
-    descriptions = load_descriptions(evals_file)
+    descriptions = load_descriptions(evals_files)
     json_runs, config, timestamp = load_json_data(json_files)
     csv_runs = load_csv_data(json_files)
     conversations, columns, rows = build_summary(json_runs)

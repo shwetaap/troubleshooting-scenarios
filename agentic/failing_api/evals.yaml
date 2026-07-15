@@ -1,4 +1,4 @@
-- conversation_group_id: failing_api_analysis_openai
+- conversation_group_id: failing_api_openai
   tag: agentic_failing_api
 
   turns:
@@ -47,7 +47,7 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: failing_api_analysis_anthropic
+- conversation_group_id: failing_api_anthropic
   tag: agentic_failing_api
 
   turns:
@@ -96,7 +96,7 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: failing_api_analysis_gemini
+- conversation_group_id: failing_api_gemini
   tag: agentic_failing_api
 
   turns:

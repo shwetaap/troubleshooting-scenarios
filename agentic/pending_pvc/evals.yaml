@@ -1,7 +1,6 @@
-- conversation_group_id: pending_pvc_analysis_openai
+- conversation_group_id: pending_pvc_openai
   tag: agentic_pending_pvc
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -45,10 +44,9 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: pending_pvc_analysis_anthropic
+- conversation_group_id: pending_pvc_anthropic
   tag: agentic_pending_pvc
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -92,10 +90,9 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: pending_pvc_analysis_gemini
+- conversation_group_id: pending_pvc_gemini
   tag: agentic_pending_pvc
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1

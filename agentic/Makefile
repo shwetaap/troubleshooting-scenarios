@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES ?= blocking_networkpolicy failing_api misconfigured_readiness_probe mismatched_ingress_rule missing_envvar scheduled_outage pending_pvc
+SUITES ?= failing_api blocking_networkpolicy misconfigured_readiness_probe mismatched_ingress_rule missing_envvar scheduled_outage pending_pvc
 RUNS ?= 1
 
 .PHONY: setup evals cleanup help
@@ -15,6 +15,8 @@ setup:
 evals:
 	$(eval RESULTS_DIR := results/$(shell date +%Y%m%d_%H%M%S))
 	@for suite in $(SUITES); do \
+	  echo "==> Setup: $$suite"; \
+	  if [ -x $$suite/setup.sh ]; then bash $$suite/setup.sh; fi; \
 	  echo "==> Suite: $$suite"; \
 	  bash $(SCRIPTS_DIR)/run-agentic-evals.sh \
 	    --system-config system.yaml \
@@ -22,7 +24,15 @@ evals:
 	    --results-dir $(RESULTS_DIR) \
 	    --runs $(RUNS) \
 	    --tag agentic_$$(echo $$suite | tr '-' '_'); \
+	  echo "==> Cleanup: $$suite"; \
+	  if [ -x $$suite/cleanup.sh ]; then bash $$suite/cleanup.sh; fi; \
 	done
+	@echo ""
+	@echo "==> Generating summary..."
+	@../venv/bin/python $(SCRIPTS_DIR)/summarize-agentic-evals.py \
+	  $(RESULTS_DIR) \
+	  $(foreach s,$(SUITES),$s/evals.yaml) \
+	  $$(find $(RESULTS_DIR) -name '*_summary.json' | sort)
 
 cleanup:
 	@for suite in $(SUITES); do \

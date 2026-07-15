@@ -41,9 +41,6 @@ fi
 
 mkdir -p "$RESULTS_DIR"
 
-# Snapshot existing JSON files before runs
-existing_jsons=$(find "$RESULTS_DIR" -maxdepth 1 -name '*_summary.json' 2>/dev/null | sort)
-
 for run in $(seq 1 "$RUNS"); do
   for tag in "${TAGS[@]}"; do
     echo ""
@@ -55,17 +52,3 @@ for run in $(seq 1 "$RUNS"); do
       --tag "$tag"
   done
 done
-
-# Find new JSON files produced by this batch
-new_jsons=$(find "$RESULTS_DIR" -maxdepth 1 -name '*_summary.json' 2>/dev/null | sort)
-batch_jsons=$(comm -13 <(echo "$existing_jsons") <(echo "$new_jsons"))
-
-if [ -n "$batch_jsons" ]; then
-  echo ""
-  echo "==> Generating summary..."
-  # shellcheck disable=SC2086
-  "${VENV_DIR}/bin/python" "${SCRIPT_DIR}/summarize-agentic-evals.py" "$RESULTS_DIR" "$EVALS" $batch_jsons
-fi
-
-echo ""
-echo "==> All agentic evals complete. Results in ${RESULTS_DIR}/"
