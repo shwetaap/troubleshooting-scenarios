@@ -1,7 +1,6 @@
 - conversation_group_id: mismatched_ingress_rule_openai
   tag: agentic_mismatched_ingress_rule
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -48,8 +47,7 @@
 
 - conversation_group_id: mismatched_ingress_rule_anthropic
   tag: agentic_mismatched_ingress_rule
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -96,8 +94,7 @@
 
 - conversation_group_id: mismatched_ingress_rule_gemini
   tag: agentic_mismatched_ingress_rule
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1

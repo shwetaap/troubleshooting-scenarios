@@ -1,7 +1,6 @@
 - conversation_group_id: misconfigured_readiness_probe_openai
   tag: agentic_misconfigured_readiness_probe
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -48,8 +47,7 @@
 
 - conversation_group_id: misconfigured_readiness_probe_anthropic
   tag: agentic_misconfigured_readiness_probe
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -96,8 +94,7 @@
 
 - conversation_group_id: misconfigured_readiness_probe_gemini
   tag: agentic_misconfigured_readiness_probe
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1

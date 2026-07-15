@@ -1,4 +1,6 @@
 **/results/
+!agentic/results/
+agentic/results/logs/
 **/_output/
 **/.caches/
 venv/

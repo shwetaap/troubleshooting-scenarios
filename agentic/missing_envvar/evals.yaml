@@ -1,7 +1,6 @@
-- conversation_group_id: envvar_missing_analysis_openai
-  tag: agentic_envvar_missing
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+- conversation_group_id: missing_envvar_openai
+  tag: agentic_missing_envvar
+
 
   turns:
     - turn_id: turn_1
@@ -43,10 +42,9 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: envvar_missing_analysis_anthropic
-  tag: agentic_envvar_missing
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+- conversation_group_id: missing_envvar_anthropic
+  tag: agentic_missing_envvar
+
 
   turns:
     - turn_id: turn_1
@@ -88,10 +86,9 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: envvar_missing_analysis_gemini
-  tag: agentic_envvar_missing
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+- conversation_group_id: missing_envvar_gemini
+  tag: agentic_missing_envvar
+
 
   turns:
     - turn_id: turn_1

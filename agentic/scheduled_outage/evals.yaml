@@ -1,7 +1,6 @@
 - conversation_group_id: scheduled_outage_openai
   tag: agentic_scheduled_outage
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -47,8 +46,7 @@
 
 - conversation_group_id: scheduled_outage_anthropic
   tag: agentic_scheduled_outage
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
@@ -94,8 +92,7 @@
 
 - conversation_group_id: scheduled_outage_gemini
   tag: agentic_scheduled_outage
-  setup_script: ./setup.sh
-  cleanup_script: ./cleanup.sh
+
 
   turns:
     - turn_id: turn_1
