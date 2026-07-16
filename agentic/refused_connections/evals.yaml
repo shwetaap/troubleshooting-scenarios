@@ -1,5 +1,5 @@
-- conversation_group_id: config_drift_analysis_openai
-  tag: agentic_config_drift_analysis
+- conversation_group_id: refused_connections_openai
+  tag: agentic_refused_connections
 
 
   turns:
@@ -42,8 +42,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: config_drift_analysis_anthropic
-  tag: agentic_config_drift_analysis
+- conversation_group_id: refused_connections_anthropic
+  tag: agentic_refused_connections
 
 
   turns:
@@ -86,8 +86,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: config_drift_analysis_gemini
-  tag: agentic_config_drift_analysis
+- conversation_group_id: refused_connections_gemini
+  tag: agentic_refused_connections
 
 
   turns:
