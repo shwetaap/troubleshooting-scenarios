@@ -1,0 +1,143 @@
+- conversation_group_id: unbalanced_replicas_openai
+  tag: agentic_unbalanced_replicas
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Namespaces: fleet-alpha, fleet-alpha1
+          Description: We expect both namespaces to have the same number of
+          running pods, but they appear to have different counts. Investigate
+          and report the pod counts in each namespace and identify any
+          discrepancy.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - fleet-alpha
+          - fleet-alpha1
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The fleet-alpha namespace has 6 running pods while
+        fleet-alpha1 has 9 running pods. The namespaces have a pod count
+        discrepancy — fleet-alpha1 has 3 more pods than fleet-alpha.
+        The additional workloads in fleet-alpha1 are store-primary,
+        store-replica, cache-handler, proxy-router, validator-east, and
+        validator-west (9 deployments) compared to fleet-alpha which has
+        2 deployments and 4 standalone pods (6 total).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: unbalanced_replicas_anthropic
+  tag: agentic_unbalanced_replicas
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Namespaces: fleet-alpha, fleet-alpha1
+          Description: We expect both namespaces to have the same number of
+          running pods, but they appear to have different counts. Investigate
+          and report the pod counts in each namespace and identify any
+          discrepancy.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - fleet-alpha
+          - fleet-alpha1
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The fleet-alpha namespace has 6 running pods while
+        fleet-alpha1 has 9 running pods. The namespaces have a pod count
+        discrepancy — fleet-alpha1 has 3 more pods than fleet-alpha.
+        The additional workloads in fleet-alpha1 are store-primary,
+        store-replica, cache-handler, proxy-router, validator-east, and
+        validator-west (9 deployments) compared to fleet-alpha which has
+        2 deployments and 4 standalone pods (6 total).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: unbalanced_replicas_gemini
+  tag: agentic_unbalanced_replicas
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Namespaces: fleet-alpha, fleet-alpha1
+          Description: We expect both namespaces to have the same number of
+          running pods, but they appear to have different counts. Investigate
+          and report the pod counts in each namespace and identify any
+          discrepancy.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - fleet-alpha
+          - fleet-alpha1
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The fleet-alpha namespace has 6 running pods while
+        fleet-alpha1 has 9 running pods. The namespaces have a pod count
+        discrepancy — fleet-alpha1 has 3 more pods than fleet-alpha.
+        The additional workloads in fleet-alpha1 are store-primary,
+        store-replica, cache-handler, proxy-router, validator-east, and
+        validator-west (9 deployments) compared to fleet-alpha which has
+        2 deployments and 4 standalone pods (6 total).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75

@@ -1,5 +1,5 @@
-- conversation_group_id: blocking_networkpolicy_openai
-  tag: agentic_blocking_networkpolicy
+- conversation_group_id: timeout_connections_openai
+  tag: agentic_timeout_connections
 
   
   turns:
@@ -43,8 +43,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: blocking_networkpolicy_anthropic
-  tag: agentic_blocking_networkpolicy
+- conversation_group_id: timeout_connections_anthropic
+  tag: agentic_timeout_connections
 
 
   turns:
@@ -88,8 +88,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: blocking_networkpolicy_gemini
-  tag: agentic_blocking_networkpolicy
+- conversation_group_id: timeout_connections_gemini
+  tag: agentic_timeout_connections
 
 
   turns:

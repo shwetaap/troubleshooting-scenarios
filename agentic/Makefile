@@ -1,6 +1,16 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES ?= failing_api blocking_networkpolicy misconfigured_readiness_probe mismatched_ingress_rule missing_envvar scheduled_outage pending_pvc config_drift_analysis
+SUITES ?= \
+	config_drift_analysis \
+  crashlooping_pod \
+	failed_job \
+	failing_api \
+	pending_pvc \
+	recurring_batch_failure \
+	sporadic_api_timeout \
+	timeout_connections \
+	unbalanced_replicas \
+	unready_pod
 RUNS ?= 1
 
 .PHONY: setup evals cleanup help
