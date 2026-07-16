@@ -6,6 +6,8 @@ Each eval suite owns a top-level directory containing evaluation scenarios for a
 
 Directory names must use underscores (`_`), not hyphens (`-`). This keeps directory names consistent with scenario tags and avoids character translation at runtime.
 
+Scenario names should describe the observable symptom in `adjective_noun` form (e.g., `pending_pvc`, `crashlooping_pod`, `failing_api`). Name what an operator would see, not the underlying root cause.
+
 ## 1. Copy the template
 
 ```bash

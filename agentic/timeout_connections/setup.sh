@@ -4,7 +4,7 @@ set -euo pipefail
 FIXTURE_DIR="$(cd "$(dirname "$0")/fixtures" && pwd)"
 NS="service-mesh"
 
-echo "Applying blocking_networkpolicy scenario manifests in namespace ${NS}…"
+echo "Applying timeout_connections scenario manifests in namespace ${NS}…"
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
 
 echo "Waiting for backend deployment to be ready…"
@@ -16,7 +16,7 @@ until [ "$ATTEMPT" -ge 30 ]; do
   ATTEMPT=$((ATTEMPT + 1))
   if oc logs -l app=frontend -n "$NS" --tail=20 2>/dev/null \
      | grep -q "ERROR: Connection timeout to backend-service!"; then
-    echo "Scenario blocking_networkpolicy ready — frontend→backend timeout confirmed (attempt ${ATTEMPT})"
+    echo "Scenario timeout_connections ready — frontend→backend timeout confirmed (attempt ${ATTEMPT})"
     exit 0
   fi
   echo "  attempt ${ATTEMPT}/30 — waiting 3s…"
