@@ -1,0 +1,131 @@
+- conversation_group_id: periodic_failure_window_openai
+  tag: agentic_periodic_failure_window
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The batch-processor in the data-pipeline namespace is processing
+          historical records. Some pod ERROR logs reported issues.
+          Investigate and identify when the errors occur and what is
+          causing them.
+        targetNamespaces:
+          - data-pipeline
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the batch-processor pod experiences repeated failures
+        during the 03:00-03:05 UTC window. The errors show "Batch submission
+        failed" with connection timeouts to https://pipeline-intake.corp.net/submit.
+        This is a recurring time-bounded pattern consistent with a scheduled
+        maintenance window on the upstream service. Outside this window the
+        batch-processor operates normally, completing batch jobs successfully.
+        The failures are not caused by a bug in the batch-processor itself.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: periodic_failure_window_anthropic
+  tag: agentic_periodic_failure_window
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The batch-processor in the data-pipeline namespace is processing
+          historical records. Some pod ERROR logs reported issues.
+          Investigate and identify when the errors occur and what is
+          causing them.
+        targetNamespaces:
+          - data-pipeline
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the batch-processor pod experiences repeated failures
+        during the 03:00-03:05 UTC window. The errors show "Batch submission
+        failed" with connection timeouts to https://pipeline-intake.corp.net/submit.
+        This is a recurring time-bounded pattern consistent with a scheduled
+        maintenance window on the upstream service. Outside this window the
+        batch-processor operates normally, completing batch jobs successfully.
+        The failures are not caused by a bug in the batch-processor itself.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: periodic_failure_window_gemini
+  tag: agentic_periodic_failure_window
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The batch-processor in the data-pipeline namespace is processing
+          historical records. Some pod ERROR logs reported issues.
+          Investigate and identify when the errors occur and what is
+          causing them.
+        targetNamespaces:
+          - data-pipeline
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the batch-processor pod experiences repeated failures
+        during the 03:00-03:05 UTC window. The errors show "Batch submission
+        failed" with connection timeouts to https://pipeline-intake.corp.net/submit.
+        This is a recurring time-bounded pattern consistent with a scheduled
+        maintenance window on the upstream service. Outside this window the
+        batch-processor operates normally, completing batch jobs successfully.
+        The failures are not caused by a bug in the batch-processor itself.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
