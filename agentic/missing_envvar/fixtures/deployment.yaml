@@ -35,7 +35,6 @@ spec:
           while true; do echo hello; sleep 10; done
         securityContext:
           runAsNonRoot: true
-          runAsUser: 65532
           allowPrivilegeEscalation: false
           capabilities:
             drop:
