@@ -16,7 +16,7 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 
 ## Prerequisites
 
-- `oc login` to an OpenShift 4.x cluster
+- `oc login` to an OpenShift 5.x cluster
 - `OPENAI_API_KEY` exported
 - [lightspeed-agentic-operator](https://github.com/openshift/lightspeed-agentic-operator) installed
 
