@@ -1,7 +1,7 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
 SUITES ?= \
-	config_drift_analysis \
+	refused_connections \
   crashlooping_pod \
 	failed_job \
 	failing_api \
