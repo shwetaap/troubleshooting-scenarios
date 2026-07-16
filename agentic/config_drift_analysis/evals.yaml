@@ -1,0 +1,131 @@
+- conversation_group_id: config_drift_analysis_openai
+  tag: agentic_config_drift_analysis
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The gateway-proxy in the ingress-layer namespace is returning
+          connection refused errors. Pod logs show repeated failures.
+          Investigate what is causing the connection refused errors.
+        targetNamespaces:
+          - ingress-layer
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the gateway-proxy connection refused errors started
+        after a configuration file change was detected and hot-reloaded.
+        The new config loaded staging database settings
+        (db-staging.internal, redis-staging.internal) into a production
+        environment. The staging hosts are unreachable from the production
+        VPC, causing all upstream connections to be refused. Fix: revert
+        the config change in /config/app.yaml to restore the production
+        upstream endpoints (db-prod.internal, redis-prod.internal).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: config_drift_analysis_anthropic
+  tag: agentic_config_drift_analysis
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The gateway-proxy in the ingress-layer namespace is returning
+          connection refused errors. Pod logs show repeated failures.
+          Investigate what is causing the connection refused errors.
+        targetNamespaces:
+          - ingress-layer
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the gateway-proxy connection refused errors started
+        after a configuration file change was detected and hot-reloaded.
+        The new config loaded staging database settings
+        (db-staging.internal, redis-staging.internal) into a production
+        environment. The staging hosts are unreachable from the production
+        VPC, causing all upstream connections to be refused. Fix: revert
+        the config change in /config/app.yaml to restore the production
+        upstream endpoints (db-prod.internal, redis-prod.internal).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: config_drift_analysis_gemini
+  tag: agentic_config_drift_analysis
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The gateway-proxy in the ingress-layer namespace is returning
+          connection refused errors. Pod logs show repeated failures.
+          Investigate what is causing the connection refused errors.
+        targetNamespaces:
+          - ingress-layer
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the gateway-proxy connection refused errors started
+        after a configuration file change was detected and hot-reloaded.
+        The new config loaded staging database settings
+        (db-staging.internal, redis-staging.internal) into a production
+        environment. The staging hosts are unreachable from the production
+        VPC, causing all upstream connections to be refused. Fix: revert
+        the config change in /config/app.yaml to restore the production
+        upstream endpoints (db-prod.internal, redis-prod.internal).
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75

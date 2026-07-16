@@ -10,6 +10,7 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 | `pending_pvc` | PVC stuck in Pending, pods cannot start | PVC references a StorageClass (`standard-v2`) that does not exist | Medium |
 | `recurring_batch_failure` | Batch processor errors during 03:00-03:05 UTC | Upstream service has a scheduled maintenance window causing connection timeouts | Medium |
 | `sporadic_api_timeout` | Report generator timeouts during 03:00-03:05 window | Upstream API has a scheduled maintenance window, not a bug in the application | Medium |
+| `config_drift_analysis` | Gateway-proxy returning connection refused errors | Config hot-reload loaded staging database/cache hosts into production; staging hosts unreachable from production VPC | Medium |
 | `crashlooping_pod` | Pod in CrashLoopBackOff | Required environment variable `DEPLOY_ENV` is missing from the deployment spec | Normal |
 | `failed_job` | inventory-sync-validator Job fails | Job cannot connect to database at prod-db:3333 (connection refused) | Normal |
 | `timeout_connections` | Frontend gets connection timeouts to backend | NetworkPolicy only allows ingress from `tier=backend`, blocking `tier=frontend` pods | Normal |

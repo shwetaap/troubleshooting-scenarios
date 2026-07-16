@@ -1,7 +1,8 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
 SUITES ?= \
-	crashlooping_pod \
+	config_drift_analysis \
+  crashlooping_pod \
 	failed_job \
 	failing_api \
 	pending_pvc \
