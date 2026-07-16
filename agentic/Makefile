@@ -1,6 +1,6 @@
 SCRIPTS_DIR := $(realpath ../scripts)
 
-SUITES ?= failing_api blocking_networkpolicy misconfigured_readiness_probe missing_envvar scheduled_outage pending_pvc
+SUITES ?= failing_api blocking_networkpolicy misconfigured_readiness_probe missing_envvar scheduled_outage pending_pvc namespace_pod_count
 RUNS ?= 1
 
 .PHONY: setup evals cleanup help
