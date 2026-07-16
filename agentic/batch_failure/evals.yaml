@@ -1,0 +1,137 @@
+- conversation_group_id: batch_failure_openai
+  tag: agentic_batch_failure
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The inventory-sync-validator job in the catalog-mgmt namespace
+          has failed. The job is part of a batch processing pipeline that
+          validates inventory data.
+
+          Investigate what caused the job to fail and identify the root
+          cause.
+        targetNamespaces:
+          - catalog-mgmt
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the inventory-sync-validator job fails because it
+        cannot connect to its database at prod-db:3333. The job logs
+        show repeated TCP connection attempts returning errno 111
+        (connection refused) and all retries are exhausted. The database
+        service at prod-db on port 3333 is either not running, not
+        reachable, or the service name/port is misconfigured.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: batch_failure_anthropic
+  tag: agentic_batch_failure
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The inventory-sync-validator job in the catalog-mgmt namespace
+          has failed. The job is part of a batch processing pipeline that
+          validates inventory data.
+
+          Investigate what caused the job to fail and identify the root
+          cause.
+        targetNamespaces:
+          - catalog-mgmt
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the inventory-sync-validator job fails because it
+        cannot connect to its database at prod-db:3333. The job logs
+        show repeated TCP connection attempts returning errno 111
+        (connection refused) and all retries are exhausted. The database
+        service at prod-db on port 3333 is either not running, not
+        reachable, or the service name/port is misconfigured.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: batch_failure_gemini
+  tag: agentic_batch_failure
+  setup_script: ./setup.sh
+  cleanup_script: ./cleanup.sh
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          The inventory-sync-validator job in the catalog-mgmt namespace
+          has failed. The job is part of a batch processing pipeline that
+          validates inventory data.
+
+          Investigate what caused the job to fail and identify the root
+          cause.
+        targetNamespaces:
+          - catalog-mgmt
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: the inventory-sync-validator job fails because it
+        cannot connect to its database at prod-db:3333. The job logs
+        show repeated TCP connection attempts returning errno 111
+        (connection refused) and all retries are exhausted. The database
+        service at prod-db on port 3333 is either not running, not
+        reachable, or the service name/port is misconfigured.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
