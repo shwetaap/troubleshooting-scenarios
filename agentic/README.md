@@ -12,7 +12,6 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 | `blocking_networkpolicy` | Frontend gets connection timeouts to backend | NetworkPolicy only allows ingress from `tier=backend`, blocking `tier=frontend` pods | Normal |
 | `misconfigured_readiness_probe` | Pod running but not becoming Ready | HTTP readiness probe targets port 9200 but container has no HTTP server | Normal |
 | `missing_envvar` | Pod in CrashLoopBackOff | Required environment variable `DEPLOY_ENV` is missing from the deployment spec | Normal |
-| `mismatched_ingress_rule` | Web-portal gets connection timeouts to API gateway | NetworkPolicy ingress rule label selector does not match the caller's labels | Normal |
 
 ## Prerequisites
 
