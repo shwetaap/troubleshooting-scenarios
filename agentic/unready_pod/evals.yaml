@@ -1,5 +1,5 @@
-- conversation_group_id: misconfigured_readiness_probe_openai
-  tag: agentic_misconfigured_readiness_probe
+- conversation_group_id: unready_pod_openai
+  tag: agentic_unready_pod
 
 
   turns:
@@ -45,8 +45,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: misconfigured_readiness_probe_anthropic
-  tag: agentic_misconfigured_readiness_probe
+- conversation_group_id: unready_pod_anthropic
+  tag: agentic_unready_pod
 
 
   turns:
@@ -92,8 +92,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: misconfigured_readiness_probe_gemini
-  tag: agentic_misconfigured_readiness_probe
+- conversation_group_id: unready_pod_gemini
+  tag: agentic_unready_pod
 
 
   turns:

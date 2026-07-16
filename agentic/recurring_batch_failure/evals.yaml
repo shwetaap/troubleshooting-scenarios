@@ -1,5 +1,5 @@
-- conversation_group_id: periodic_failure_window_openai
-  tag: agentic_periodic_failure_window
+- conversation_group_id: recurring_batch_failure_openai
+  tag: agentic_recurring_batch_failure
 
 
   turns:
@@ -42,8 +42,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: periodic_failure_window_anthropic
-  tag: agentic_periodic_failure_window
+- conversation_group_id: recurring_batch_failure_anthropic
+  tag: agentic_recurring_batch_failure
 
 
   turns:
@@ -86,8 +86,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: periodic_failure_window_gemini
-  tag: agentic_periodic_failure_window
+- conversation_group_id: recurring_batch_failure_gemini
+  tag: agentic_recurring_batch_failure
 
 
   turns:

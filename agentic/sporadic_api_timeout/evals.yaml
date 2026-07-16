@@ -1,5 +1,5 @@
-- conversation_group_id: scheduled_outage_openai
-  tag: agentic_scheduled_outage
+- conversation_group_id: sporadic_api_timeout_openai
+  tag: agentic_sporadic_api_timeout
 
 
   turns:
@@ -44,8 +44,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: scheduled_outage_anthropic
-  tag: agentic_scheduled_outage
+- conversation_group_id: sporadic_api_timeout_anthropic
+  tag: agentic_sporadic_api_timeout
 
 
   turns:
@@ -90,8 +90,8 @@
         "custom:proposal_evaluation_correctness":
           threshold: 0.75
 
-- conversation_group_id: scheduled_outage_gemini
-  tag: agentic_scheduled_outage
+- conversation_group_id: sporadic_api_timeout_gemini
+  tag: agentic_sporadic_api_timeout
 
 
   turns:
