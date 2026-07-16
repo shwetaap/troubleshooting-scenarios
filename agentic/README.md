@@ -13,6 +13,7 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 | `misconfigured_readiness_probe` | Pod running but not becoming Ready | HTTP readiness probe targets port 9200 but container has no HTTP server | Normal |
 | `missing_envvar` | Pod in CrashLoopBackOff | Required environment variable `DEPLOY_ENV` is missing from the deployment spec | Normal |
 | `mismatched_ingress_rule` | Web-portal gets connection timeouts to API gateway | NetworkPolicy ingress rule label selector does not match the caller's labels | Normal |
+| `config_drift_analysis` | Gateway-proxy returning connection refused errors | Config hot-reload loaded staging database/cache hosts into production; staging hosts unreachable from production VPC | Medium |
 
 ## Prerequisites
 
