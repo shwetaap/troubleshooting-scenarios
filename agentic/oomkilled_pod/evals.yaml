@@ -1,0 +1,134 @@
+- conversation_group_id: oomkilled_pod_openai
+  tag: agentic_oomkilled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: awesome-application
+          Namespace: oom-scenario
+          Status: CrashLoopBackOff
+          Description: The awesome-application pods are repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - oom-scenario
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The awesome-application pods are being OOMKilled because
+        the container runs a Python script that continuously allocates ~1MB
+        per second, exceeding the 60Mi memory limit. The container has a
+        deliberate memory leak that causes unbounded memory growth until the
+        kernel OOM killer terminates the process. Fix: Either increase the
+        memory limit or fix the application code to avoid the memory leak.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: oomkilled_pod_anthropic
+  tag: agentic_oomkilled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: awesome-application
+          Namespace: oom-scenario
+          Status: CrashLoopBackOff
+          Description: The awesome-application pods are repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - oom-scenario
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The awesome-application pods are being OOMKilled because
+        the container runs a Python script that continuously allocates ~1MB
+        per second, exceeding the 60Mi memory limit. The container has a
+        deliberate memory leak that causes unbounded memory growth until the
+        kernel OOM killer terminates the process. Fix: Either increase the
+        memory limit or fix the application code to avoid the memory leak.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: oomkilled_pod_gemini
+  tag: agentic_oomkilled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: awesome-application
+          Namespace: oom-scenario
+          Status: CrashLoopBackOff
+          Description: The awesome-application pods are repeatedly crashing.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - oom-scenario
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The awesome-application pods are being OOMKilled because
+        the container runs a Python script that continuously allocates ~1MB
+        per second, exceeding the 60Mi memory limit. The container has a
+        deliberate memory leak that causes unbounded memory growth until the
+        kernel OOM killer terminates the process. Fix: Either increase the
+        memory limit or fix the application code to avoid the memory leak.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75

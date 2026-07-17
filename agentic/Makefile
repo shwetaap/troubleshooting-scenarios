@@ -5,6 +5,7 @@ SUITES ?= \
   crashlooping_pod \
 	failed_job \
 	failing_api \
+	oomkilled_pod \
 	pending_pvc \
 	recurring_batch_failure \
 	sporadic_api_timeout \
