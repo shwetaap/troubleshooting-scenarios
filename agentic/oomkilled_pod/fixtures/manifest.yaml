@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oom-scenario
+  labels:
+    purpose: eval-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: awesome-application
+  namespace: oom-scenario
+  labels:
+    app: awesome-application
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: awesome-application
+  template:
+    metadata:
+      labels:
+        app: awesome-application
+    spec:
+      containers:
+      - name: app
+        image: python:3.9-slim
+        command:
+        - python3
+        - -c
+        - |
+          import time
+          print("Starting application...")
+          data = []
+          while True:
+              data.append("x" * 1000000)
+              print(f"Allocated {len(data)} MB")
+              time.sleep(1)
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "60Mi"
+          limits:
+            cpu: "100m"
+            memory: "60Mi"

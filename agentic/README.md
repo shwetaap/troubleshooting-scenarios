@@ -13,6 +13,7 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 | `refused_connections` | Gateway-proxy returning connection refused errors | Config hot-reload loaded staging database/cache hosts into production; staging hosts unreachable from production VPC | Medium |
 | `crashlooping_pod` | Pod in CrashLoopBackOff | Required environment variable `DEPLOY_ENV` is missing from the deployment spec | Normal |
 | `failed_job` | inventory-sync-validator Job fails | Job cannot connect to database at prod-db:3333 (connection refused) | Normal |
+| `oomkilled_pod` | Pods repeatedly OOMKilled / CrashLoopBackOff | Python app has a memory leak (~1MB/s) that exceeds the 60Mi container limit | Normal |
 | `timeout_connections` | Frontend gets connection timeouts to backend | NetworkPolicy only allows ingress from `tier=backend`, blocking `tier=frontend` pods | Normal |
 | `unbalanced_replicas` | Namespaces have different pod counts | fleet-alpha has 6 pods vs fleet-alpha1 with 9, due to different deployment sets | Normal |
 | `unready_pod` | Pod running but not becoming Ready | HTTP readiness probe targets port 9200 but container has no HTTP server | Normal |
