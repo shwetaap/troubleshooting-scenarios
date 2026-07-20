@@ -2,7 +2,7 @@ SCRIPTS_DIR := $(realpath ../scripts)
 
 SUITES ?= \
 	refused_connections \
-  crashlooping_pod \
+	crashlooping_pod \
 	failed_job \
 	failing_api \
 	oomkilled_pod \
@@ -11,7 +11,8 @@ SUITES ?= \
 	sporadic_api_timeout \
 	timeout_connections \
 	unbalanced_replicas \
-	unready_pod
+	unready_pod \
+	unscheduled_pod
 RUNS ?= 1
 
 .PHONY: setup evals cleanup help
@@ -24,6 +25,15 @@ setup:
 	@echo "This will be automated in the future."
 
 evals:
+	@for suite in $(SUITES); do \
+	  if [ ! -d "$$suite" ]; then \
+	    echo "Error: suite '$$suite' not found. Available suites:"; \
+	    for d in */; do \
+	      if [ -f "$$d/evals.yaml" ]; then echo "  $${d%/}"; fi; \
+	    done; \
+	    exit 1; \
+	  fi; \
+	done
 	$(eval DATETIME := $(shell date +%Y%m%d_%H%M%S))
 	$(eval LOGS_DIR := results/logs/$(DATETIME))
 	$(eval SUMMARY := results/results_$(DATETIME).md)
