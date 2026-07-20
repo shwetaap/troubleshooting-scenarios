@@ -2,10 +2,11 @@
 set -euo pipefail
 
 FIXTURE_DIR="$(cd "$(dirname "$0")/fixtures" && pwd)"
-NS="oom-scenario"
-APP="awesome-application"
+NS="data-processing"
+APP="report-generator"
 
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
+oc apply -f "$FIXTURE_DIR/prometheusrule.yaml"
 
 echo "Waiting for $APP to be OOMKilled…"
 ATTEMPT=0

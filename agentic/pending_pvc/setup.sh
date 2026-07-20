@@ -6,6 +6,7 @@ NS="cache-tier"
 PVC="memcached-data-pvc"
 
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
+oc apply -f "$FIXTURE_DIR/prometheusrule.yaml"
 
 # Wait for ProvisioningFailed event on the PVC
 echo "Waiting for ProvisioningFailed event on $PVC…"

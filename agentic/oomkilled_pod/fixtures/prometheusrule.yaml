@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: data-processing-alerts
+  namespace: data-processing
+spec:
+  groups:
+    - name: data-processing.workloads
+      rules:
+        - alert: DataProcessingPodRestarting
+          expr: |
+            increase(kube_pod_container_status_restarts_total{namespace="data-processing"}[10m]) > 2
+          for: 15s
+          labels:
+            severity: warning
+          annotations:
+            summary: Pod {{ $labels.pod }} is restarting unexpectedly
+            description: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted multiple times. Check resource limits and application logs.

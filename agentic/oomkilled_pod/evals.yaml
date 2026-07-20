@@ -6,14 +6,14 @@
     - turn_id: turn_1
       proposal_spec:
         request: |
-          Pod: awesome-application
-          Namespace: oom-scenario
+          Pod: report-generator
+          Namespace: data-processing
           Status: CrashLoopBackOff
-          Description: The awesome-application pods are repeatedly crashing.
+          Description: The report-generator pods are repeatedly crashing.
 
           Investigate and identify the root cause
         targetNamespaces:
-          - oom-scenario
+          - data-processing
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
@@ -29,7 +29,7 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: The awesome-application pods are being OOMKilled because
+        Root cause: The report-generator pods are being OOMKilled because
         the container runs a Python script that continuously allocates ~1MB
         per second, exceeding the 60Mi memory limit. The container has a
         deliberate memory leak that causes unbounded memory growth until the
@@ -51,14 +51,14 @@
     - turn_id: turn_1
       proposal_spec:
         request: |
-          Pod: awesome-application
-          Namespace: oom-scenario
+          Pod: report-generator
+          Namespace: data-processing
           Status: CrashLoopBackOff
-          Description: The awesome-application pods are repeatedly crashing.
+          Description: The report-generator pods are repeatedly crashing.
 
           Investigate and identify the root cause
         targetNamespaces:
-          - oom-scenario
+          - data-processing
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
@@ -74,7 +74,7 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: The awesome-application pods are being OOMKilled because
+        Root cause: The report-generator pods are being OOMKilled because
         the container runs a Python script that continuously allocates ~1MB
         per second, exceeding the 60Mi memory limit. The container has a
         deliberate memory leak that causes unbounded memory growth until the
@@ -96,14 +96,14 @@
     - turn_id: turn_1
       proposal_spec:
         request: |
-          Pod: awesome-application
-          Namespace: oom-scenario
+          Pod: report-generator
+          Namespace: data-processing
           Status: CrashLoopBackOff
-          Description: The awesome-application pods are repeatedly crashing.
+          Description: The report-generator pods are repeatedly crashing.
 
           Investigate and identify the root cause
         targetNamespaces:
-          - oom-scenario
+          - data-processing
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
@@ -119,7 +119,7 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: The awesome-application pods are being OOMKilled because
+        Root cause: The report-generator pods are being OOMKilled because
         the container runs a Python script that continuously allocates ~1MB
         per second, exceeding the 60Mi memory limit. The container has a
         deliberate memory leak that causes unbounded memory growth until the
