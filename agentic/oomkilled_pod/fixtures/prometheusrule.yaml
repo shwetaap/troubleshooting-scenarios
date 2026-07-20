@@ -9,7 +9,7 @@ spec:
       rules:
         - alert: DataProcessingPodRestarting
           expr: |
-            increase(kube_pod_container_status_restarts_total{namespace="data-processing"}[10m]) > 2
+            kube_pod_container_status_restarts_total{namespace="data-processing"} > 2
           for: 15s
           labels:
             severity: warning

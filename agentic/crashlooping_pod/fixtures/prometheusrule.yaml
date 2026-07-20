@@ -9,7 +9,7 @@ spec:
       rules:
         - alert: WarehouseOpsPodRestarting
           expr: |
-            increase(kube_pod_container_status_restarts_total{namespace="warehouse-ops"}[10m]) > 2
+            kube_pod_container_status_restarts_total{namespace="warehouse-ops"} > 2
           for: 15s
           labels:
             severity: warning

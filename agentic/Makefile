@@ -15,9 +15,18 @@ SUITES ?= \
 	unscheduled_pod
 RUNS ?= 1
 
-.PHONY: setup evals cleanup deploy-alerts cleanup-alerts help
+.PHONY: setup evals cleanup help
+
+ALERT_SUITES := crashlooping_pod oomkilled_pod pending_pvc unready_pod
 
 setup:
+	@$(SCRIPTS_DIR)/enable-uwm.sh
+	@for suite in $(ALERT_SUITES); do \
+	  echo "==> Deploying alert scenario: $$suite"; \
+	  bash $$suite/setup.sh; \
+	done
+	@echo ""
+	@echo "All alert scenarios deployed."
 	$(SCRIPTS_DIR)/setup-venv.sh
 	@echo ""
 	@echo "NOTE: Install lightspeed-agentic-operator manually by following:"
@@ -25,7 +34,6 @@ setup:
 	@echo "This will be automated in the future."
 
 evals:
-	@$(SCRIPTS_DIR)/enable-uwm.sh
 	@for suite in $(SUITES); do \
 	  if [ ! -d "$$suite" ]; then \
 	    echo "Error: suite '$$suite' not found. Available suites:"; \
@@ -68,25 +76,6 @@ cleanup:
 	done
 	rm -rf ../venv
 	@echo "venv removed."
-
-ALERT_SUITES := crashlooping_pod oomkilled_pod pending_pvc unready_pod
-
-deploy-alerts:
-	@$(SCRIPTS_DIR)/enable-uwm.sh
-	@for suite in $(ALERT_SUITES); do \
-	  echo "==> Deploying with alerts: $$suite"; \
-	  bash $$suite/setup.sh; \
-	done
-	@echo ""
-	@echo "All alert scenarios deployed."
-
-cleanup-alerts:
-	@for suite in $(ALERT_SUITES); do \
-	  echo "==> Cleaning up: $$suite"; \
-	  bash $$suite/cleanup.sh; \
-	done
-	@echo ""
-	@echo "All alert scenarios removed."
 
 help:
 	@echo "Usage: make <target> [RUNS=N]"
