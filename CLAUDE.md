@@ -115,6 +115,22 @@ Monitoring is wired via Prometheus ServiceMonitors and PrometheusRules with aler
 - `generic/02-alert-storm/scripts/` -- shell scripts that implement each Make target
 - `generic/02-alert-storm/images/` -- Dockerfiles and Python source for all five services
 
+## Architecture: generic/03-image-pull-failure (Image Pull Failure with PDB Alert)
+
+Single `inventory` namespace with one application:
+
+- **`inventory-app`**: A simple service using Red Hat UBI (`registry.redhat.io/ubi9/ubi`) with 3 replicas. A PodDisruptionBudget requires at least 2 healthy pods.
+
+The fault: A typo is introduced in the container image reference (`ubi9/ubi9` instead of `ubi9/ubi`), causing all pods to enter `ImagePullBackOff`. With zero healthy pods, the PDB is violated and the platform-level `PodDisruptionBudgetLimit` alert fires.
+
+No custom images or PrometheusRules are needed — this scenario relies on a standard Red Hat image and the built-in OpenShift PDB alert.
+
+### Key Paths
+
+- `generic/03-image-pull-failure/README.md` -- scenario overview and components
+- `generic/03-image-pull-failure/manifests/` -- Kubernetes manifests (namespace, deployment, service, ServiceMonitor, PDB)
+- `generic/03-image-pull-failure/scripts/` -- shell scripts that implement each Make target
+
 ## Tech Stack
 
 - **Eval framework**: [lightspeed-evaluation](https://github.com/lightspeed-core/lightspeed-evaluation), Python 3.11–3.13
