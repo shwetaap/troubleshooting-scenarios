@@ -34,18 +34,17 @@
         Root cause: shared-services/reporting-service is repeatedly opening
         DB connections and leaving them idle in transaction (division by zero
         without rollback/close), exhausting PostgreSQL connection slots.
-        payments/payments-api cannot obtain a DB connection and returns 503,
-        triggering the alert storm. reconciliation-service CrashLooping is a
-        separate issue (probe port mismatch 8443 vs 8080), not related to
-        the DB connection exhaustion. Fix: restart or scale down
-        reporting-service.
+        payments/payments-api cannot obtain a DB connection and returns 503.
+        reconciliation-service CrashLooping is a separate issue (probe port 
+        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
         - "custom:proposal_status"
         - "custom:proposal_evaluation_correctness"
       turn_metrics_metadata:
         "custom:proposal_evaluation_correctness":
-          threshold: 0.75
+          threshold: 0.80
 
 - conversation_group_id: failing_api_anthropic
   tag: agentic_failing_api
@@ -83,18 +82,17 @@
         Root cause: shared-services/reporting-service is repeatedly opening
         DB connections and leaving them idle in transaction (division by zero
         without rollback/close), exhausting PostgreSQL connection slots.
-        payments/payments-api cannot obtain a DB connection and returns 503,
-        triggering the alert storm. reconciliation-service CrashLooping is a
-        separate issue (probe port mismatch 8443 vs 8080), not related to
-        the DB connection exhaustion. Fix: restart or scale down
-        reporting-service.
+        payments/payments-api cannot obtain a DB connection and returns 503.
+        reconciliation-service CrashLooping is a separate issue (probe port 
+        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
         - "custom:proposal_status"
         - "custom:proposal_evaluation_correctness"
       turn_metrics_metadata:
         "custom:proposal_evaluation_correctness":
-          threshold: 0.75
+          threshold: 0.80
 
 - conversation_group_id: failing_api_gemini
   tag: agentic_failing_api
@@ -132,15 +130,14 @@
         Root cause: shared-services/reporting-service is repeatedly opening
         DB connections and leaving them idle in transaction (division by zero
         without rollback/close), exhausting PostgreSQL connection slots.
-        payments/payments-api cannot obtain a DB connection and returns 503,
-        triggering the alert storm. reconciliation-service CrashLooping is a
-        separate issue (probe port mismatch 8443 vs 8080), not related to
-        the DB connection exhaustion. Fix: restart or scale down
-        reporting-service.
+        payments/payments-api cannot obtain a DB connection and returns 503.
+        reconciliation-service CrashLooping is a separate issue (probe port 
+        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
         - "custom:proposal_status"
         - "custom:proposal_evaluation_correctness"
       turn_metrics_metadata:
         "custom:proposal_evaluation_correctness":
-          threshold: 0.75
+          threshold: 0.80
