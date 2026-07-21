@@ -13,14 +13,14 @@
             namespace: payments
             severity: critical
 
-          Investigate, follow causality chains to the root cause
+          Investigate using the skill at /app/skills/cluster-troubleshoot/investigate-alert
         targetNamespaces:
           - payments
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
               paths:
-                - /skills/cluster-troubleshoot
+                - /skills/cluster-troubleshoot/investigate-alert
         analysis:
           agent: default
 
@@ -31,12 +31,11 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: shared-services/reporting-service is repeatedly opening
-        DB connections and leaving them idle in transaction (division by zero
-        without rollback/close), exhausting PostgreSQL connection slots.
+        Root cause: shared-services/reporting-service is repeatedly opening DB connections
+        and not releasing them properly, exhausting PostgreSQL connection slots.
         payments/payments-api cannot obtain a DB connection and returns 503.
-        reconciliation-service CrashLooping is a separate issue (probe port 
-        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        if mentioned, reconciliation-service CrashLooping is a separate issue, NOT RELATED
+        to the DB connection exhaustion.
         Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
@@ -61,14 +60,14 @@
             namespace: payments
             severity: critical
 
-          Investigate, follow causality chains to the root cause
+          Investigate using the skill at /app/skills/cluster-troubleshoot/investigate-alert
         targetNamespaces:
           - payments
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
               paths:
-                - /skills/cluster-troubleshoot
+                - /skills/cluster-troubleshoot/investigate-alert
         analysis:
           agent: opus
 
@@ -79,12 +78,11 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: shared-services/reporting-service is repeatedly opening
-        DB connections and leaving them idle in transaction (division by zero
-        without rollback/close), exhausting PostgreSQL connection slots.
+        Root cause: shared-services/reporting-service is repeatedly opening DB connections
+        and not releasing them properly, exhausting PostgreSQL connection slots.
         payments/payments-api cannot obtain a DB connection and returns 503.
-        reconciliation-service CrashLooping is a separate issue (probe port 
-        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        if mentioned, reconciliation-service CrashLooping is a separate issue, NOT RELATED
+        to the DB connection exhaustion.
         Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
@@ -109,14 +107,14 @@
             namespace: payments
             severity: critical
 
-          Investigate, follow causality chains to the root cause
+          Investigate using the skill at /app/skills/cluster-troubleshoot/investigate-alert
         targetNamespaces:
           - payments
         tools:
           skills:
             - image: quay.io/afalossi/agentic-skills:latest
               paths:
-                - /skills/cluster-troubleshoot          
+                - /skills/cluster-troubleshoot/investigate-alert
         analysis:
           agent: gemini
 
@@ -127,12 +125,11 @@
             status: "True"
 
       expected_outcome: >-
-        Root cause: shared-services/reporting-service is repeatedly opening
-        DB connections and leaving them idle in transaction (division by zero
-        without rollback/close), exhausting PostgreSQL connection slots.
+        Root cause: shared-services/reporting-service is repeatedly opening DB connections
+        and not releasing them properly, exhausting PostgreSQL connection slots.
         payments/payments-api cannot obtain a DB connection and returns 503.
-        reconciliation-service CrashLooping is a separate issue (probe port 
-        mismatch 8443 vs 8080), NOT RELATED to the DB connection exhaustion. 
+        if mentioned, reconciliation-service CrashLooping is a separate issue, NOT RELATED
+        to the DB connection exhaustion.
         Fix: rollback, restart, or scale down reporting-service.
 
       turn_metrics:
