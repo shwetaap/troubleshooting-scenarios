@@ -6,7 +6,7 @@ help:
 	@echo "Available targets:"
 	@echo "  update-images     Build and push container images (REGISTRY=quay.io/...)"
 	@echo "  deploy            Deploy the initial state"
-	@echo "  deploy-easy       Deploy with per-service DB users (easier to diagnose)"
+	@echo "  deploy-easy       Easy mode: single namespace, per-service DB users, fewer alerts, no red herring"
 	@echo "  break             Roll out buggy reporting-service v1.0.2 and wait for failure"
 	@echo "  fix               Roll back to reporting-service v1.0.1"
 	@echo "  delete-history    Reset Prometheus TSDB and restart pods"
@@ -18,7 +18,7 @@ help:
 	@echo ""
 	@echo "Options:"
 	@echo "  SINGLE_NAMESPACE=1  Deploy everything into the payments namespace"
-	@echo "                      (only needed for deploy/deploy-easy; other targets auto-detect)"
+	@echo "                      (only for deploy; deploy-easy always uses single namespace)"
 
 update-images:
 	@./scripts/update-images.sh $(REGISTRY)
@@ -27,7 +27,7 @@ deploy:
 	@SINGLE_USER=1 SINGLE_NAMESPACE=$(SINGLE_NAMESPACE) ./scripts/deploy.sh
 
 deploy-easy:
-	@SINGLE_NAMESPACE=$(SINGLE_NAMESPACE) ./scripts/deploy.sh
+	@SINGLE_USER=0 SINGLE_NAMESPACE=1 ./scripts/deploy.sh
 
 break:
 	@./scripts/break.sh

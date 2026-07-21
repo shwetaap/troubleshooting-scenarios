@@ -7,13 +7,9 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$SCRIPT_DIR"
 
-if [ "${SINGLE_USER:-}" = "1" ] || [ "${SINGLE_NAMESPACE:-}" = "1" ]; then
-  MANIFESTS=$(mktemp -d)
-  trap 'rm -rf $MANIFESTS' EXIT
-  cp -r manifests/* "$MANIFESTS/"
-else
-  MANIFESTS="manifests"
-fi
+MANIFESTS=$(mktemp -d)
+trap 'rm -rf $MANIFESTS' EXIT
+cp -r manifests/* "$MANIFESTS/"
 
 if [ "${SINGLE_USER:-}" = "1" ]; then
   # Both services use a single "dbuser" account
@@ -28,7 +24,40 @@ if [ "${SINGLE_USER:-}" = "1" ]; then
   sed -i "/CREATE USER payments/,/GRANT.*TO payments;/d" \
     "$MANIFESTS/shared-services/02-postgres.yaml"
 
+  # Upgrade database connection alert to critical (easy mode keeps it as warning)
+  sed -i '/PostgresqlTooManyConnections/,/severity:/{s/severity: warning/severity: critical/}' \
+    "$MANIFESTS/shared-services/05-prometheusrules.yaml"
+
+  # Add warning-level payment alert (easy mode only has critical)
+  cat > "$MANIFESTS/payments/03-monitoring-warning.yaml" <<'ALERT'
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: payment-alerts-warning
+  namespace: payments
+spec:
+  groups:
+    - name: payments.business.warning
+      rules:
+        - alert: PaymentErrorRateHigh
+          expr: |
+            sum(rate(http_requests_total{namespace="payments", code=~"5.."}[1m]))
+            / sum(rate(http_requests_total{namespace="payments"}[1m])) * 100 > 3
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: Payment error rate exceeding threshold
+            description: Payment error rate is {{ $value | printf "%.2f" }}%, which
+              exceeds the 3% threshold.
+ALERT
+
   echo "=== Single-user mode: all services will use 'dbuser' ==="
+else
+  rm -f "$MANIFESTS/shared-services/04-reconciliation-service.yaml"
+  sed -i '/alert: PostgresqlConnectionsHigh/,/alert: PostgresqlTooManyConnections/{/alert: PostgresqlTooManyConnections/!d}' \
+    "$MANIFESTS/shared-services/05-prometheusrules.yaml"
+  echo "=== Easy mode: reduced alerts, no red herring ==="
 fi
 
 if [ "${SINGLE_NAMESPACE:-}" = "1" ]; then

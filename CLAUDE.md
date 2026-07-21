@@ -76,16 +76,14 @@ make cleanup        # Remove OLS operator + local venv
 
 ## Architecture: generic/01-payments-api-failure (Database Connection Exhaustion)
 
-Two OpenShift namespaces share a PostgreSQL database with `max_connections=20`:
+Services share a PostgreSQL database with `max_connections=20`. The fault: `reporting-service` v1.0.2 accumulates database connections without closing them, exhausting the shared pool and causing payments-api to return 503s.
 
-- **`payments`** namespace: `payments-api` (Python/FastAPI) serves `GET /api/v1/process-payment` and runs a background traffic simulator. Connects cross-namespace to `postgres.shared-services.svc.cluster.local`.
-- **`shared-services`** namespace: `postgres` (with postgres-exporter sidecar on port 9187), `reporting-service` (two versions), and `reconciliation-service` (intentional red herring, always in CrashLoopBackOff).
+Two deployment modes control difficulty:
 
-The fault: `reporting-service` v1.0.2 accumulates database connections without closing them, exhausting the shared pool and causing payments-api to return 503s from a different namespace.
+- **`make deploy-easy`**: single `payments` namespace, per-service DB users (`payments`, `reporting`), only 1 critical alert (payment error rate) and 1 warning (DB connections), no red herring.
+- **`make deploy`** (hard): two namespaces (`payments`, `shared-services`), shared `dbuser` DB account, graduated alerts (warning + critical for both payment and DB), `reconciliation-service` red herring (always in CrashLoopBackOff). Accepts `SINGLE_NAMESPACE=1` to collapse into one namespace while keeping other hard-mode traits.
 
-Monitoring is wired via Prometheus ServiceMonitors and PrometheusRules with alerts on error rate (`PaymentErrorRateHigh`) and connection count (`PostgresqlConnectionsHigh`, `PostgresqlTooManyConnections`).
-
-**Single-namespace mode**: `make deploy SINGLE_NAMESPACE=1` deploys everything into the `payments` namespace. The deploy script transforms manifests on the fly (retargets namespace, rewrites PGHOST to same-namespace service name, fixes PromQL expressions). Operational scripts (break, fix, cleanup, etc.) auto-detect the deployment mode by checking whether the `shared-services` namespace exists.
+The deploy script always works on a temp copy of manifests, applying sed transformations per mode. Operational scripts (break, fix, cleanup, etc.) auto-detect the deployment mode by checking whether the `shared-services` namespace exists.
 
 ### Key Paths
 
