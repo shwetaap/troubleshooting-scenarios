@@ -17,6 +17,7 @@ Behavioral evals for automated troubleshooting with [OpenShift Agentic Lightspee
 | `timeout_connections` | Frontend gets connection timeouts to backend | NetworkPolicy only allows ingress from `tier=backend`, blocking `tier=frontend` pods | Normal |
 | `unbalanced_replicas` | Namespaces have different pod counts | fleet-alpha has 6 pods vs fleet-alpha1 with 9, due to different deployment sets | Normal |
 | `unready_pod` | Pod running but not becoming Ready | HTTP readiness probe targets port 9200 but container has no HTTP server | Normal |
+| `unscheduled_pod` | Pod stuck in Pending, not scheduled to any node | nodeSelector requires `disk-type=ssd-high-iops` but no nodes have this label | Normal |
 
 ## Prerequisites
 

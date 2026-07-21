@@ -1,0 +1,137 @@
+- conversation_group_id: unscheduled_pod_openai
+  tag: agentic_unscheduled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: user-profile-import
+          Namespace: user-imports
+          Status: Pending
+          Description: The user-profile-import pod is stuck in Pending state
+          and has not been scheduled to any node.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - user-imports
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: default
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The user-profile-import pod is stuck in Pending state
+        because its nodeSelector requires the label "disk-type=ssd-high-iops"
+        but no nodes in the cluster have this label. The scheduler cannot
+        find a suitable node to place the pod. Fix: Either add the
+        "disk-type=ssd-high-iops" label to a node or remove/update the
+        nodeSelector in the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: unscheduled_pod_anthropic
+  tag: agentic_unscheduled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: user-profile-import
+          Namespace: user-imports
+          Status: Pending
+          Description: The user-profile-import pod is stuck in Pending state
+          and has not been scheduled to any node.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - user-imports
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: opus
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The user-profile-import pod is stuck in Pending state
+        because its nodeSelector requires the label "disk-type=ssd-high-iops"
+        but no nodes in the cluster have this label. The scheduler cannot
+        find a suitable node to place the pod. Fix: Either add the
+        "disk-type=ssd-high-iops" label to a node or remove/update the
+        nodeSelector in the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75
+
+- conversation_group_id: unscheduled_pod_gemini
+  tag: agentic_unscheduled_pod
+
+
+  turns:
+    - turn_id: turn_1
+      proposal_spec:
+        request: |
+          Pod: user-profile-import
+          Namespace: user-imports
+          Status: Pending
+          Description: The user-profile-import pod is stuck in Pending state
+          and has not been scheduled to any node.
+
+          Investigate and identify the root cause
+        targetNamespaces:
+          - user-imports
+        tools:
+          skills:
+            - image: quay.io/afalossi/agentic-skills:latest
+              paths:
+                - /skills/cluster-troubleshoot
+        analysis:
+          agent: gemini
+
+      expected_proposal_status:
+        phase: Completed
+        conditions:
+          - type: Analyzed
+            status: "True"
+
+      expected_outcome: >-
+        Root cause: The user-profile-import pod is stuck in Pending state
+        because its nodeSelector requires the label "disk-type=ssd-high-iops"
+        but no nodes in the cluster have this label. The scheduler cannot
+        find a suitable node to place the pod. Fix: Either add the
+        "disk-type=ssd-high-iops" label to a node or remove/update the
+        nodeSelector in the deployment spec.
+
+      turn_metrics:
+        - "custom:proposal_status"
+        - "custom:proposal_evaluation_correctness"
+      turn_metrics_metadata:
+        "custom:proposal_evaluation_correctness":
+          threshold: 0.75

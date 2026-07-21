@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: user-imports
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-profile-import
+  namespace: user-imports
+  labels:
+    app: user-profile-import
+    component: import
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-profile-import
+  template:
+    metadata:
+      labels:
+        app: user-profile-import
+    spec:
+      containers:
+      - name: import-container
+        image: registry.access.redhat.com/ubi9/ubi-micro@sha256:35de56a9413112f1474e392ebc35e0cf6f0fb484c8e8877bbae59b513694b41f
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          requests:
+            cpu: "5m"
+            memory: "32Mi"
+      nodeSelector:
+        disk-type: ssd-high-iops
