@@ -1,0 +1,24 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: inventory-alerts
+  namespace: inventory
+spec:
+  groups:
+    - name: inventory.kubernetes
+      rules:
+        - alert: InventoryPodImagePullBackOff
+          expr: |
+            max by (namespace, pod, container) (
+              kube_pod_container_status_waiting_reason{namespace="inventory", reason="ImagePullBackOff"} > 0
+            )
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: Pod {{ $labels.pod }} has ImagePullBackOff
+            description: >-
+              Container {{ $labels.container }} in pod {{ $labels.pod }}
+              (namespace {{ $labels.namespace }}) has been unable to pull its
+              image for more than 1 minute.

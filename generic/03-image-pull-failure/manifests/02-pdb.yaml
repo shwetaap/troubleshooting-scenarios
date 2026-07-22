@@ -1,0 +1,14 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: inventory-app-pdb
+  namespace: inventory
+  labels:
+    app: inventory-app
+    app.kubernetes.io/part-of: inventory-system
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: inventory-app
