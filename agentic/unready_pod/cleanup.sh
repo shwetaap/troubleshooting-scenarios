@@ -4,6 +4,7 @@ set -euo pipefail
 NS="discovery-hub"
 
 echo "Removing unready_pod scenario resources from namespace ${NS}…"
+oc delete -f "$(cd "$(dirname "$0")/fixtures" && pwd)/prometheusrule.yaml" --ignore-not-found
 oc delete pod catalog-index-service -n "$NS" --ignore-not-found
 
 oc delete namespace "$NS" --ignore-not-found

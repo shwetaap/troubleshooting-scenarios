@@ -3,6 +3,7 @@ set -euo pipefail
 
 NS="cache-tier"
 
+oc delete -f "$(cd "$(dirname "$0")/fixtures" && pwd)/prometheusrule.yaml" --ignore-not-found
 oc delete pvc memcached-data-pvc -n "$NS" --ignore-not-found
 oc delete deployment memcached -n "$NS" --ignore-not-found
 oc delete svc memcached -n "$NS" --ignore-not-found

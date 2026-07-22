@@ -17,7 +17,16 @@ RUNS ?= 1
 
 .PHONY: setup evals cleanup help
 
+ALERT_SUITES := crashlooping_pod oomkilled_pod pending_pvc unready_pod
+
 setup:
+	@$(SCRIPTS_DIR)/enable-uwm.sh
+	@for suite in $(ALERT_SUITES); do \
+	  echo "==> Deploying alert scenario: $$suite"; \
+	  bash $$suite/setup.sh; \
+	done
+	@echo ""
+	@echo "All alert scenarios deployed."
 	$(SCRIPTS_DIR)/setup-venv.sh
 	@echo ""
 	@echo "NOTE: Install lightspeed-agentic-operator manually by following:"

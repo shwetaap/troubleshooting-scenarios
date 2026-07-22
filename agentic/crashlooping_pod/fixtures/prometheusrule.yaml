@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: warehouse-ops-alerts
+  namespace: warehouse-ops
+spec:
+  groups:
+    - name: warehouse-ops.workloads
+      rules:
+        - alert: WarehouseOpsPodRestarting
+          expr: |
+            kube_pod_container_status_restarts_total{namespace="warehouse-ops"} > 2
+          for: 15s
+          labels:
+            severity: warning
+          annotations:
+            summary: Pod {{ $labels.pod }} is restarting frequently
+            description: Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has restarted multiple times. Check application logs and resource configuration.

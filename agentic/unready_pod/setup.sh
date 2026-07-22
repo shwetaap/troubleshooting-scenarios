@@ -7,6 +7,7 @@ POD_NAME="catalog-index-service"
 
 echo "Applying unready_pod scenario manifests in namespace ${NS}…"
 oc apply -f "$FIXTURE_DIR/manifest.yaml"
+oc apply -f "$FIXTURE_DIR/prometheusrule.yaml"
 
 echo "Waiting for readiness probe failure event (up to 60s)…"
 ATTEMPT=0

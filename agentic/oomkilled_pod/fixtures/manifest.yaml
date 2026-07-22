@@ -1,26 +1,26 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: oom-scenario
+  name: data-processing
   labels:
     purpose: eval-test
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: awesome-application
-  namespace: oom-scenario
+  name: report-generator
+  namespace: data-processing
   labels:
-    app: awesome-application
+    app: report-generator
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: awesome-application
+      app: report-generator
   template:
     metadata:
       labels:
-        app: awesome-application
+        app: report-generator
     spec:
       containers:
       - name: app

@@ -6,6 +6,7 @@ NS="warehouse-ops"
 APP="order-fulfillment-daemon"
 
 oc apply -f "$FIXTURE_DIR/deployment.yaml"
+oc apply -f "$FIXTURE_DIR/prometheusrule.yaml"
 
 # Wait for the pod to appear
 echo "Waiting for $APP pod to be created…"
